@@ -4,6 +4,7 @@
 1. Setting up project
     + [x] initialise repository
     + [x] setup linting tools and compilers
+    + [ ] create a `build`, `install` and `test` script
 2. High Level Design
     + [ ] create high level design.
 3. Low Level Design
