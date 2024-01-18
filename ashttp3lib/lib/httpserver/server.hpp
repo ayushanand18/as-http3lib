@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <string>
 
 //! \brief Implements a msgpack-h/3 server. This is the main interfacing
 //! point with the library for creating servers.
@@ -23,5 +24,11 @@ namespace ashttp3lib :: httpserver {
         //!
         //! \param other The other instance to move from.
         HttpServer(HttpServer&& other) noexcept;
+
+        //! \brief Server Name. This is the name of the server, reflected in 
+        //! HTTP responses.
+        std::string serverName;
+
+        
     };
 }
