@@ -1,28 +1,37 @@
 #include <boost/asio.hpp>
 #include <iostream>
 #include <string>
+#include "logging.hpp"
 #include "request.hpp"
 
+
 namespace ashttp3lib::h1 {
+
 class HTTPServer {
+  ashttp3lib::logging::Logger* logger;
+
  public:
   HTTPServer(int port_num)
       : acceptor(io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),
                                                     port_num)),
-        socket(io) {}
+        socket(io) {
+    this->logger = new ashttp3lib::logging::Logger();
+  }
 
   void run() {
     acceptRequest();
     io.run();
   }
 
-  void get (std::string path, std::function<std::string(ashttp3lib::h1::Request& )> bind_func) {
+  void get(std::string path,
+           std::function<std::string(ashttp3lib::h1::Request&)> bind_func) {
     routes_[path]["GET"] = bind_func;
   }
 
-  void post (std::string path, std::function<std::string(ashttp3lib::h1::Request& )> bind_func) {
+  void post(std::string path,
+            std::function<std::string(ashttp3lib::h1::Request&)> bind_func) {
     routes_[path]["POST"] = bind_func;
-  } 
+  }
 
  private:
   void acceptRequest() {
@@ -52,14 +61,18 @@ class HTTPServer {
   }
 
   void mapRequestWithResponse(Request& request_packet) {
-    std::cout << request_packet.path << " " << request_packet.method << std::endl;
-    if(routes_.find(request_packet.path) == routes_.end()) {
-        sendResponse("404 Not Found", "The resource was not found on server.");
-    } else if (routes_[request_packet.path].find(request_packet.method) == routes_[request_packet.path].end()) {
-        sendResponse("405 Method Not Allowed", "The used method is not allowed.");
+    if (routes_.find(request_packet.path) == routes_.end()) {
+      this->logger->info(request_packet.method + " " + request_packet.path + " 404 Not Found");
+      sendResponse("404 Not Found", "The resource was not found on server.");
+    } else if (routes_[request_packet.path].find(request_packet.method) ==
+               routes_[request_packet.path].end()) {
+      this->logger->info(request_packet.method + " " + request_packet.path + " 405 Method Not Allowed");
+      sendResponse("405 Method Not Allowed", "The used method is not allowed.");
     } else {
-        auto response = routes_[request_packet.path][request_packet.method](request_packet);
-        sendResponse("200 OK", response);
+      auto response =
+          routes_[request_packet.path][request_packet.method](request_packet);
+      this->logger->info(request_packet.method + " " + request_packet.path + " 200 OK");
+      sendResponse("200 OK", response);
     }
   }
 
@@ -82,9 +95,11 @@ class HTTPServer {
   boost::asio::streambuf request;
   boost::asio::streambuf response;
 
-  std::unordered_map < std::string, std::unordered_map < std::string,
-      std::function<std::string(ashttp3lib::h1::Request& )>
-  >> routes_;
+  std::unordered_map<
+      std::string,
+      std::unordered_map<std::string,
+                         std::function<std::string(ashttp3lib::h1::Request&)>>>
+      routes_;
 };
 
 }  // namespace ashttp3lib::h1
