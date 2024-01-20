@@ -1,12 +1,12 @@
 #include "../ashttp3lib/h1/server.hpp"
 
 std::string handleGetRequest(ashttp3lib::h1::Request& request_packet) {
-    return "Handling POST request";
+  return "Handling GET request: " + request_packet.path;
 }
 
 int main() {
   try {
-    ashttp3lib::h1::HTTPServer server(8002);
+    ashttp3lib::h1::HTTPServer server(8004);
     server.get("/test", handleGetRequest);
     server.run();
   } catch (const std::exception& e) {
