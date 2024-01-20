@@ -59,6 +59,6 @@ NUMA node0 CPU(s):                  0,1
 
 Parameter        | ashttp3lib      | FastAPI
 -----------------|-----------------|-----------------
-Startup Time     | 0.005 s         | 0.622 s
+Startup Time     | 0.005 s         | 0.681 s
 
 > Tested by using `time` on Linux.
