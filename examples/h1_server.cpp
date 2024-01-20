@@ -6,7 +6,7 @@ std::string handleGetRequest(ashttp3lib::h1::Request& request_packet) {
 
 int main() {
   try {
-    ashttp3lib::h1::HTTPServer server(8004);
+    ashttp3lib::h1::HTTPServer server(8000);
     server.get("/test", handleGetRequest);
     server.run();
   } catch (const std::exception& e) {
