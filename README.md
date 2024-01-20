@@ -2,6 +2,10 @@
 > An Asynchronous HTTP/1.1 and HTTP/3 based Server Library with support of
 > concurrency using ThreadPools and native Linux Primitives.
 
+## Performance
+Some stats:
+* Minimal version 138x (138 times) faster on startup time than FastAPI based server (equal endpoints and configs).
+
 ## Design
 + [Miro Board](https://miro.com/app/board/uXjVN645xLw=/?share_link_id=143978576535)
 
@@ -61,4 +65,6 @@ Parameter        | ashttp3lib      | FastAPI
 -----------------|-----------------|-----------------
 Startup Time     | 0.005 s         | 0.681 s
 
-> Tested by using `time` on Linux.
+> Tested by using `time` on Linux. These times are an average of 3 consecutive runs so as to
+> offset system load irregularities however these figure might (and probably shall) differ on
+> each and every run.
