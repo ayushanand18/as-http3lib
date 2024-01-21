@@ -38,15 +38,11 @@ class Request {
 
   //! \brief Constructor for Request class.
   //! \param request_stream. [std::istream&] Input stream containing the HTTP request.
-  Request(std::istream& request_stream) noexcept {
-    request_stream.exceptions(std::istream::failbit|std::istream::badbit);
-    std::string line = "";
+  Request(std::string request_stream) noexcept {
     try {
-      for (int line_no = 0; getline(request_stream, line); ++line_no) {
-        if(request_stream.fail()) {
-          request_stream.clear();
-          break;
-        }
+      auto lines = ashttp3lib::h1::utils::split(request_stream, "\r\n");
+      for (int line_no = 0; line_no < lines.size(); ++line_no) {
+        std::string line = lines[line_no];
         if (line_no == 0) {
           auto splitted_title = ashttp3lib::h1::utils::split(line, " ");
           if(splitted_title.size() < 2) break;

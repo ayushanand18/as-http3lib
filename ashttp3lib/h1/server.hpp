@@ -91,8 +91,9 @@ class HTTPServer {
 
   //! \brief Process the incoming request.
   void processRequest() {
-    std::istream request_stream(&request);
-    auto request_packet = ashttp3lib::h1::Request(request_stream);
+    std::string result(boost::asio::buffer_cast<const char*>(request.data()),
+                       boost::asio::buffer_size(request.data()));
+    auto request_packet = ashttp3lib::h1::Request(result);
 
     mapRequestWithResponse(request_packet);
   }
