@@ -1,3 +1,27 @@
+/*
+  ashttp3lib/h1/server.hpp - A C++ HTTP/1.1 Library using Boost.Asio Server Class
+  
+  Copyright (c) 2024, Ayush Anand
+  
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+  
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+  
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include <boost/asio.hpp>
 #include <iostream>
 #include <string>
@@ -11,6 +35,8 @@ class HTTPServer {
   ashttp3lib::logging::Logger* logger;
 
  public:
+  //! \brief Constructor for HTTPServer class.
+  //! \param port_num. [int] Port number for the server to bind.
   HTTPServer(int port_num)
       : acceptor(io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),
                                                     port_num)),
@@ -19,32 +45,31 @@ class HTTPServer {
   }
 
   //! \brief Run Server. Make a blocking run of the server instance.
-  //! listen to requests and process them.
+  //! Listen to requests and process them.
   void run() {
     acceptRequest();
     io.run();
   }
 
+  //! \brief Register a GET handler.
+  //! \param path. [std::string] Path on the server to register GET handler.
+  //! \param bind_func. [std::function<std::string(Request&)>] Callback function to handle GET requests.
   void get(std::string path,
            std::function<std::string(ashttp3lib::h1::Request&)> bind_func) {
-    //! \brief GET handler. Register a callback function for GET request on path
-    //! \param path. [std::string] path on the server to register GET handler.
-    //! \param bind_func. [std::function<std::string(Request&)>] Callback function to handle Request.
     routes_[path]["GET"] = bind_func;
   }
 
+  //! \brief Register a POST handler.
+  //! \param path. [std::string] Path on the server to register POST handler.
+  //! \param bind_func. [std::function<std::string(Request&)>] Callback function to handle POST requests.
   void post(std::string path,
             std::function<std::string(ashttp3lib::h1::Request&)> bind_func) {
-              
-    //! \brief POST handler. Register a callback function for POST request on path
-    //! \param path. [std::string] path on the server to register POST handler.
-    //! \param bind_func. [std::function<std::string(Request&)>] Callback function to handle Request.
     routes_[path]["POST"] = bind_func;
   }
 
  private:
+  //! \brief Asynchronously accept incoming requests.
   void acceptRequest() {
-    //! \brief Accept Request. Accept Request asynchronously from socket,
     acceptor.async_accept(socket, [this](const boost::system::error_code& ec) {
       if (!ec) {
         handleRequest();
@@ -53,8 +78,8 @@ class HTTPServer {
     });
   }
 
+  //! \brief Asynchronously handle incoming requests.
   void handleRequest() {
-    //! \brief Read Request. Read and process request, terminate when receive two blank lines.
     boost::asio::async_read_until(socket, request, "\r\n\r\n",
                                   [this](const boost::system::error_code& ec,
                                          std::size_t bytes_transferred) {
@@ -64,17 +89,16 @@ class HTTPServer {
                                   });
   }
 
+  //! \brief Process the incoming request.
   void processRequest() {
-    //! \brief Process Request. Process request and return response according to handlers.
     std::istream request_stream(&request);
     auto request_packet = ashttp3lib::h1::Request(request_stream);
 
     mapRequestWithResponse(request_packet);
   }
 
+  //! \brief Map the incoming request to an appropriate response handler.
   void mapRequestWithResponse(Request& request_packet) {
-    //! \brief Handle Request. Return a response according to the mapped handlers.
-    //! \param request_packet. [Request&] Request packet received from Client.
     if (routes_.find(request_packet.path) == routes_.end()) {
       this->logger->info(request_packet.method + " " + request_packet.path +
                          " 404 Not Found");
@@ -93,10 +117,8 @@ class HTTPServer {
     }
   }
 
+  //! \brief Send a response based on the processed information.
   void sendResponse(const std::string& status, const std::string& content) {
-    //! \brief Send Response. Send a response accoring to processed information.
-    //! \param status. [const std::string&] status code of the response.
-    //! \param content. [const std::string&] content of the response.
     std::ostream response_stream(&response);
     response_stream << "HTTP/1.1 " << status << "\r\n";
     response_stream << "Content-Length: " << content.length() << "\r\n";
@@ -109,7 +131,7 @@ class HTTPServer {
                std::size_t bytes_transferred) { socket.close(); });
   }
 
-  //! BOOST based data members for IO Ops.
+  //! Boost-based data members for IO Operations.
   boost::asio::io_service io;
   boost::asio::ip::tcp::acceptor acceptor;
   boost::asio::ip::tcp::socket socket;
@@ -125,3 +147,5 @@ class HTTPServer {
 };
 
 }  // namespace ashttp3lib::h1
+
+// ashttp3lib/h1/server.hpp

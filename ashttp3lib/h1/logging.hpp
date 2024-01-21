@@ -1,3 +1,27 @@
+/*
+  ashttp3lib/h1/logging.hpp - A C++ HTTP/1.1 Library Logger Class
+  
+  Copyright (c) 2024, Ayush Anand
+  
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+  
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+  
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -5,19 +29,30 @@
 
 namespace ashttp3lib::logging {
 
+//! \brief Logger Class. Provides logging functionality for different log levels.
 class Logger {
  public:
+  //! \brief Constructor for Logger class.
   Logger() {}
 
+  //! \brief Destructor for Logger class.
   ~Logger() {}
 
+  //! \brief Log an informational message.
+  //! \param message. [const std::string&] The message to be logged.
   void info(const std::string& message) { log("INFO", message); }
 
+  //! \brief Log a warning message.
+  //! \param message. [const std::string&] The message to be logged.
   void warning(const std::string& message) { log("WARNING", message); }
 
+  //! \brief Log an error message.
+  //! \param message. [const std::string&] The message to be logged.
   void error(const std::string& message) { log("ERROR", message); }
 
  private:
+  //! \brief Get the current timestamp in the format [%Y-%m-%d %H:%M:%S.%09d].
+  //! \return [std::string] The current timestamp.
   std::string getCurrentTimestamp() {
     auto now = std::chrono::system_clock::now();
     auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -44,6 +79,9 @@ class Logger {
     return std::string(timestamp) + nsBuffer;
   }
 
+  //! \brief Log a message with a specified log level.
+  //! \param level. [const std::string&] The log level (INFO, WARNING, ERROR).
+  //! \param message. [const std::string&] The message to be logged.
   void log(const std::string& level, const std::string& message) {
 
     std::ostringstream logEntry;
@@ -54,3 +92,5 @@ class Logger {
 };
 
 }  // namespace ashttp3lib::logging
+
+// ashttp3lib/h1/logging.hpp
