@@ -15,8 +15,7 @@ TEST(AsHttp3LibTest, SplitFunction) {
 // Test case for request parsing by ashttp3lib::h1::request::Request Class
 TEST(AsHttp3LibTest, RequestParsing) {
     std::string input_stream = "GET /test HTTP/1.1\r\nHost: example.com\r\nUser-Agent: Your-User-Agent\r\nAccept: */*\r\n\r\n";
-    std::istringstream request_stream(input_stream);
-    ashttp3lib::h1::Request result(request_stream);
+    ashttp3lib::h1::Request result(input_stream);
 
     // Assert, all headers are parsed directly
     ASSERT_EQ(result.headers.size(), 3);
