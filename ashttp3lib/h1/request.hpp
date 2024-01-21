@@ -51,11 +51,11 @@ class Request {
           auto splitted_title = ashttp3lib::h1::utils::split(line, " ");
           if(splitted_title.size() < 2) break;
           this->method = splitted_title[0];
-          this->path = splitted_title[1];
+          this->path = ashttp3lib::h1::utils::removeTrailingCarriageReturns(splitted_title[1]);
         } else {
           auto splitted_line = ashttp3lib::h1::utils::split(line, ": ");
           if(splitted_line.size() < 2) break;
-          this->headers[splitted_line[0]] = splitted_line[1];
+          this->headers[splitted_line[0]] = ashttp3lib::h1::utils::removeTrailingCarriageReturns(splitted_line[1]);
         }
       }
     } catch (const std::exception& e) {

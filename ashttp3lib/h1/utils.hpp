@@ -46,6 +46,17 @@ std::vector<std::string> split(std::string s, std::string delimiter) {
   return res;
 }
 
+std::string removeTrailingCarriageReturns(std::string text) {
+  // Find the last character that is not a carriage return
+  size_t lastNonCR = text.find_last_not_of('\r');
+
+  // If lastNonCR is not equal to the last character in the string, remove trailing carriage returns
+  if (lastNonCR != std::string::npos && lastNonCR < text.length() - 1) {
+    return text.substr(0, lastNonCR + 1);
+  }
+  return text;
+}
+
 }  // namespace ashttp3lib::h1::utils
 
 // ashttp3lib/h1/logging.hpp
