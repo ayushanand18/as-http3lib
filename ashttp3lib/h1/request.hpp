@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <unordered_map>
+#include <sstream>
 #include "utils.hpp"
 
 namespace ashttp3lib::h1 {
@@ -37,26 +38,28 @@ class Request {
   std::string body;                      //!< Request body.
 
   //! \brief Constructor for Request class.
-  //! \param request_stream. [std::istream&] Input stream containing the HTTP request.
-  Request(std::string request_stream) noexcept {
-    try {
-      auto lines = ashttp3lib::h1::utils::split(request_stream, "\r\n");
-      for (int line_no = 0; line_no < lines.size(); ++line_no) {
-        std::string line = lines[line_no];
-        if (line_no == 0) {
-          auto splitted_title = ashttp3lib::h1::utils::split(line, " ");
-          if(splitted_title.size() < 2) break;
-          this->method = splitted_title[0];
-          this->path = ashttp3lib::h1::utils::removeTrailingCarriageReturns(splitted_title[1]);
-        } else {
-          auto splitted_line = ashttp3lib::h1::utils::split(line, ": ");
-          if(splitted_line.size() < 2) break;
-          this->headers[splitted_line[0]] = ashttp3lib::h1::utils::removeTrailingCarriageReturns(splitted_line[1]);
+  //! \param request_stream. [std::istream&] Input string containing the HTTP request.
+  Request(const std::string& requestString) noexcept {
+    std::istringstream requestStream(requestString);
+
+    // Parse the first line to get method, path, and HTTP version
+    getline(requestStream, this->method, ' ');
+    getline(requestStream, this->path, ' ');
+
+    // Parse headers
+    std::string line;
+    while (getline(requestStream, line) && line != "\r") {
+        size_t colonPos = line.find(':');
+        if (colonPos != std::string::npos) {
+            std::string headerName = line.substr(0, colonPos);
+            // skip the colon after header name
+            std::string headerValue = line.substr(colonPos + 2);  
+            this->headers[headerName] = ashttp3lib::h1::utils::removeTrailingCarriageReturns(headerValue);
         }
-      }
-    } catch (const std::exception& e) {
-      std::cerr << "Exception: " << e.what() << "\n";
     }
+
+    // Parse the request body
+    getline(requestStream, this->body, '\0');
   };
 };
 
