@@ -95,7 +95,7 @@ class HTTPServer {
                        boost::asio::buffer_size(request.data()));
     auto request_packet = ashttp3lib::h1::Request(result);
 
-    mapRequestWithResponse(request_packet);
+    std::async(std::launch::async, &HTTPServer::mapRequestWithResponse, this, std::ref(request_packet));
   }
 
   //! \brief Map the incoming request to an appropriate response handler.
@@ -103,7 +103,7 @@ class HTTPServer {
     if (routes_.find(request_packet.path) == routes_.end()) {
       this->logger->info(request_packet.method + " " + request_packet.path +
                          " 404 Not Found");
-      sendResponse("404 Not Found", "The resource was not found on server.");
+      std::async(std::launch::async, &HTTPServer::sendResponse, this, "404 Not Found", "The resource was not found on server.");
     } else if (routes_[request_packet.path].find(request_packet.method) ==
                routes_[request_packet.path].end()) {
       this->logger->info(request_packet.method + " " + request_packet.path +
