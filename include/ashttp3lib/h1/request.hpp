@@ -22,20 +22,20 @@
   SOFTWARE.
 */
 
-#include <iostream>
-#include <unordered_map>
-#include <sstream>
 #include <ashttp3lib/h1/utils.hpp>
+#include <iostream>
+#include <sstream>
+#include <unordered_map>
 
 namespace ashttp3lib::h1 {
 
 //! \brief Request Class. Represents an HTTP/1.1 request.
 class Request {
  public:
-  std::string method;                    //!< HTTP method (GET, POST, etc.).
-  std::string path;                      //!< Path specified in the request.
+  std::string method;  //!< HTTP method (GET, POST, etc.).
+  std::string path;    //!< Path specified in the request.
   std::unordered_map<std::string, std::string> headers;  //!< Request headers.
-  std::string body;                      //!< Request body.
+  std::string body;                                      //!< Request body.
 
   //! \brief Constructor for Request class.
   //! \param request_stream. [std::istream&] Input string containing the HTTP request.
@@ -49,13 +49,14 @@ class Request {
     // Parse headers
     std::string line;
     while (getline(requestStream, line) && line != "\r") {
-        size_t colonPos = line.find(':');
-        if (colonPos != std::string::npos) {
-            std::string headerName = line.substr(0, colonPos);
-            // skip the colon after header name
-            std::string headerValue = line.substr(colonPos + 2);  
-            this->headers[headerName] = ashttp3lib::h1::utils::removeTrailingCarriageReturns(headerValue);
-        }
+      size_t colonPos = line.find(':');
+      if (colonPos != std::string::npos) {
+        std::string headerName = line.substr(0, colonPos);
+        // skip the colon after header name
+        std::string headerValue = line.substr(colonPos + 2);
+        this->headers[headerName] =
+            ashttp3lib::h1::utils::removeTrailingCarriageReturns(headerValue);
+      }
     }
 
     // Parse the request body
@@ -64,4 +65,5 @@ class Request {
 };
 
 }  // namespace ashttp3lib::h1
+
 // ashttp3lib/h1/server.hpp

@@ -22,11 +22,11 @@
   SOFTWARE.
 */
 
+#include <ashttp3lib/h1/logging.hpp>
+#include <ashttp3lib/h1/request.hpp>
 #include <boost/asio.hpp>
 #include <iostream>
 #include <string>
-#include <ashttp3lib/h1/logging.hpp>
-#include <ashttp3lib/h1/request.hpp>
 
 namespace ashttp3lib::h1 {
 
@@ -53,7 +53,8 @@ class HTTPServer {
 
   //! \brief Register a GET handler.
   //! \param path. [std::string] Path on the server to register GET handler.
-  //! \param bind_func. [std::function<std::string(Request&)>] Callback function to handle GET requests.
+  //! \param bind_func. [std::function<std::string(Request&)>] Callback function to 
+  //! handle GET requests.
   void get(std::string path,
            std::function<std::string(ashttp3lib::h1::Request&)> bind_func) {
     routes_[path]["GET"] = bind_func;
@@ -61,7 +62,8 @@ class HTTPServer {
 
   //! \brief Register a POST handler.
   //! \param path. [std::string] Path on the server to register POST handler.
-  //! \param bind_func. [std::function<std::string(Request&)>] Callback function to handle POST requests.
+  //! \param bind_func. [std::function<std::string(Request&)>] Callback function to 
+  //! handle POST requests.
   void post(std::string path,
             std::function<std::string(ashttp3lib::h1::Request&)> bind_func) {
     routes_[path]["POST"] = bind_func;
@@ -95,7 +97,8 @@ class HTTPServer {
                        boost::asio::buffer_size(request.data()));
     auto request_packet = ashttp3lib::h1::Request(result);
 
-    std::async(std::launch::async, &HTTPServer::mapRequestWithResponse, this, std::ref(request_packet));
+    std::async(std::launch::async, &HTTPServer::mapRequestWithResponse, this,
+               std::ref(request_packet));
   }
 
   //! \brief Map the incoming request to an appropriate response handler.
@@ -103,7 +106,8 @@ class HTTPServer {
     if (routes_.find(request_packet.path) == routes_.end()) {
       this->logger->info(request_packet.method + " " + request_packet.path +
                          " 404 Not Found");
-      std::async(std::launch::async, &HTTPServer::sendResponse, this, "404 Not Found", "The resource was not found on server.");
+      std::async(std::launch::async, &HTTPServer::sendResponse, this,
+                 "404 Not Found", "The resource was not found on server.");
     } else if (routes_[request_packet.path].find(request_packet.method) ==
                routes_[request_packet.path].end()) {
       this->logger->info(request_packet.method + " " + request_packet.path +
