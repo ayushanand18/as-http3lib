@@ -1,11 +1,10 @@
 {
     "configurations": [
         {
-            "name": "Your Configuration Name",
+            "name": "All",
             "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/include/"
-                // Add more paths as needed
+                "${workspaceFolder}/include/*",
+                "${workspaceFolder}/include/dependencies/*"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
