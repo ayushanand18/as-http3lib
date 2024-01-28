@@ -4,7 +4,7 @@
             "name": "All",
             "includePath": [
                 "${workspaceFolder}/include/*",
-                "${workspaceFolder}/include/dependencies/*"
+                "${workspaceFolder}/include/deps/*"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
