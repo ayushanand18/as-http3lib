@@ -1,0 +1,5 @@
+/workspaces/as-http3lib/quiche/target/release/build/quiche-406dd0c4ab88745e/out/build/CMakeFiles/rebuild_cache.dir
+/workspaces/as-http3lib/quiche/target/release/build/quiche-406dd0c4ab88745e/out/build/CMakeFiles/edit_cache.dir
+/workspaces/as-http3lib/quiche/target/release/build/quiche-406dd0c4ab88745e/out/build/CMakeFiles/bssl.dir
+/workspaces/as-http3lib/quiche/target/release/build/quiche-406dd0c4ab88745e/out/build/CMakeFiles/ssl.dir
+/workspaces/as-http3lib/quiche/target/release/build/quiche-406dd0c4ab88745e/out/build/CMakeFiles/crypto.dir
