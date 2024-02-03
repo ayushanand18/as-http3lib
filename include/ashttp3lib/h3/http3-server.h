@@ -89,6 +89,7 @@ static quiche_h3_config* http3_config = NULL;
 static struct connections* conns = NULL;
 
 class Http3Server {
+ private:
   struct addrinfo* local;
   int sock;
 
