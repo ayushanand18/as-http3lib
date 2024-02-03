@@ -387,6 +387,9 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
       }
 
       while (1) {
+        // each connection can be idenfied with this, therefore process anything 
+        // related to the request with this string. maybe construct an asio
+        // queue of response object and send them
         int64_t s = quiche_h3_conn_poll(conn_io->http3, conn_io->conn, &ev);
 
         if (s < 0) {
