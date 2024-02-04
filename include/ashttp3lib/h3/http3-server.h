@@ -92,6 +92,8 @@ class Http3Server {
  private:
   struct addrinfo* local;
   int sock;
+  std::string host;
+  std::string port;
 
  public:
   Http3Server(std::string, std::string);
@@ -120,16 +122,15 @@ class Http3Server {
 };
 
 Http3Server::Http3Server(std::string host_in, std::string port_in) {
-  const char* host = host_in.c_str();
-  const char* port = port_in.c_str();
-
+  this->host = std::move(host_in);
+  this->port = std::move(port_in);
   const struct addrinfo hints = {.ai_family = PF_UNSPEC,
                                  .ai_socktype = SOCK_DGRAM,
                                  .ai_protocol = IPPROTO_UDP};
 
   quiche_enable_debug_logging(debug_log, NULL);
 
-  if (getaddrinfo(host, port, &hints, &local) != 0) {
+  if (getaddrinfo(host.c_str(), port.c_str(), &hints, &local) != 0) {
     perror("failed to resolve host");
     exit(-1);
   }
