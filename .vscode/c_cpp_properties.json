@@ -5,7 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/include/*",
                 "${workspaceFolder}/include/deps/uthash/*",
-                "${workspaceFolder}/quiche/quiche/include/**"
+                "${workspaceFolder}/include/deps/quiche/include"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
