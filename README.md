@@ -1,6 +1,6 @@
 # as-http3lib
 > An Asynchronous HTTP/1.1 and HTTP/3 based Server Library with support of
-> concurrency using ThreadPools and native Linux Primitives.
+> concurrency using Event Loop (using `libev`) and native Linux Primitives.
 
 ## Performance
 Some stats:
@@ -68,3 +68,13 @@ Startup Time     | 0.005 s         | 0.681 s        | YTM
 > Tested by using `time` on Linux. These times are an average of 3 consecutive runs so as to
 > offset system load irregularities however these figure might (and probably shall) differ on
 > each and every run.
+
+
+## Acknowledgements
+Other performant libraries form the backbone of this repository, and made it possible to build. We 
+utilise the following open source libraries for developing `ashttp3lib`
+* `cloudflare/quiche`
+* `google/boringssl`
+* `libev`
+
+Thanks!
