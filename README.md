@@ -61,9 +61,9 @@ NUMA node0 CPU(s):                  0,1
 
 **Results**
 
-Parameter        | ashttp3lib      | FastAPI
------------------|-----------------|-----------------
-Startup Time     | 0.005 s         | 0.681 s
+Parameter        | ashttp3lib::h1  | FastAPI (H/1.1)| ashttp3lib::h3
+-----------------|-----------------|----------------|-----------------
+Startup Time     | 0.005 s         | 0.681 s        | YTM
 
 > Tested by using `time` on Linux. These times are an average of 3 consecutive runs so as to
 > offset system load irregularities however these figure might (and probably shall) differ on
