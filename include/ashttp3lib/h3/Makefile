@@ -25,12 +25,12 @@ endif
 LIBS = $(LIB_DIR)/libquiche.a -lev -ldl -pthread -lm
 
 client: http3-client.c $(INCLUDE_DIR)/quiche.h $(LIB_DIR)/libquiche.a
-	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@ $(INCS) $(LIBS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $< -o $@.out $(INCS) $(LIBS)
 
 server: http3-server.cpp $(INCLUDE_DIR)/quiche.h $(LIB_DIR)/libquiche.a
-	g++ $(CFLAGS) --std=c++2a $(LDFLAGS) $< -o $@ $(INCS) $(LIBS)
+	g++ $(CFLAGS) --std=c++2a $(LDFLAGS) $< -o $@.out $(INCS) $(LIBS)
 
 sample-server: http3-server-sample.cpp $(INCLUDE_DIR)/quiche.h $(LIB_DIR)/libquiche.a
-	g++ $(CFLAGS) --std=c++2a $(LDFLAGS) $< -o $@ $(INCS) $(LIBS)
+	g++ $(CFLAGS) --std=c++2a $(LDFLAGS) $< -o $@.out $(INCS) $(LIBS)
 clean:
 	@$(RM) -rf client server http3-client http3-server build/ *.dSYM/
