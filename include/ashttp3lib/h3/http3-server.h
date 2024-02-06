@@ -88,37 +88,45 @@ static quiche_h3_config* http3_config = NULL;
 
 static struct connections* conns = NULL;
 
+typedef std::function<(std::string(std::unordered_map<std::string, std::string>))> CallbackFunction;
+
 class Http3Server {
  private:
   struct addrinfo* local;
   int sock;
   std::string host;
   std::string port;
-
+  std::unordered_map<
+    std::string,
+    std::unordered_map<std::string,
+                        std::function<std::string(ashttp3lib::h1::Request&)>>>
+    routes_;
+ 
  public:
   Http3Server(std::string, std::string);
   void run();
 
  private:
-  static void timeout_cb(EV_P_ ev_timer* w, int revents);
-  static void recv_cb(EV_P_ ev_io* w, int revents);
-  static int for_each_header(uint8_t* name, size_t name_len, uint8_t* value,
+  void timeout_cb(EV_P_ ev_timer* w, int revents);
+  void recv_cb(EV_P_ ev_io* w, int revents);
+  int for_each_header(uint8_t* name, size_t name_len, uint8_t* value,
                              size_t value_len, void* argp);
-  static struct conn_io* create_conn(uint8_t* scid, size_t scid_len,
+  struct conn_io* create_conn(uint8_t* scid, size_t scid_len,
                                      uint8_t* odcid, size_t odcid_len,
                                      struct sockaddr* local_addr,
                                      socklen_t local_addr_len,
                                      struct sockaddr_storage* peer_addr,
                                      socklen_t peer_addr_len);
-  static uint8_t* gen_cid(uint8_t* cid, size_t cid_len);
-  static bool validate_token(const uint8_t* token, size_t token_len,
+  uint8_t* gen_cid(uint8_t* cid, size_t cid_len);
+  bool validate_token(const uint8_t* token, size_t token_len,
                              struct sockaddr_storage* addr, socklen_t addr_len,
                              uint8_t* odcid, size_t* odcid_len);
-  static void mint_token(const uint8_t* dcid, size_t dcid_len,
+  void mint_token(const uint8_t* dcid, size_t dcid_len,
                          struct sockaddr_storage* addr, socklen_t addr_len,
                          uint8_t* token, size_t* token_len);
-  static void flush_egress(struct ev_loop* loop, struct conn_io* conn_io);
-  static void debug_log(const char* line, void* argp);
+  void flush_egress(struct ev_loop* loop, struct conn_io* conn_io);
+  void debug_log(const char* line, void* argp);
+  void add_route(std::string method, std::string path, CallbackFunction request);
 };
 
 Http3Server::Http3Server(std::string host_in, std::string port_in) {
@@ -643,6 +651,10 @@ void Http3Server::flush_egress(struct ev_loop* loop, struct conn_io* conn_io) {
 
 void Http3Server::debug_log(const char* line, void* argp) {
   fprintf(stderr, "%s\n", line);
+}
+
+void Http3Server::add_route(std::string method, std::string path, CallbackFunction bind_func) {
+  routes_[path][method] = bind_func;
 }
 
 }  // namespace ashttp3lib
