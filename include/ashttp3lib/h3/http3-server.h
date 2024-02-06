@@ -405,10 +405,15 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
           break;
         }
 
+        // define a new H3Request Object, and pass it down
+        // to get the headers, and body of the request
+        // auto request = new ashttp3lib::H3Request
         switch (quiche_h3_event_type(ev)) {
           case QUICHE_H3_EVENT_HEADERS: {
             // an event loop handles parsing of headers -> asynchronous processing
             int rc = quiche_h3_event_for_each_header(ev, for_each_header, NULL);
+            // int rc = quiche_h3_event_for_each_header(ev, for_each_header, &request);
+
             // TODO: if there is a failure in parsing of headers
             //       return a status code of 500 Internal Server Error
             if (rc != 0) {
@@ -444,22 +449,26 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
                 },
             };
 
+            // TODO: do not send the headers right now, delay to event finisdhed
             quiche_h3_send_response(conn_io->http3, conn_io->conn, s, headers,
                                     3, false);
 
             // TODO: send the respnse body according to the callback
             //       function on the requested route and method
+            //       do not send the body right now, send in EVENT_FINISHED
             quiche_h3_send_body(conn_io->http3, conn_io->conn, s,
                                 (uint8_t*)"byez\n", 5, true);
             break;
           }
 
           case QUICHE_H3_EVENT_DATA: {
+            // TODO: parse the body also of the incoming request
             fprintf(stderr, "got HTTP data\n");
             break;
           }
 
           case QUICHE_H3_EVENT_FINISHED:
+            // TODO: return the response of the request after processing
             break;
 
           case QUICHE_H3_EVENT_RESET:
@@ -474,6 +483,8 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
           }
         }
 
+        // deallocate the request object constructed
+        // delete request;
         quiche_h3_event_free(ev);
       }
     }
