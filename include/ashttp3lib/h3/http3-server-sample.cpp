@@ -7,7 +7,7 @@
 #include "http3-server.h"
 
 int main() {
-    ashttp3lib::Http3Server server("127.0.0.1", "8080");
+    ashttp3lib::Http3Server server("127.0.0.1", "8080", true);
     server.run();
 
     return 0;

@@ -99,44 +99,44 @@ class Http3Server {
   std::unordered_map<
     std::string,
     std::unordered_map<std::string,
-                        std::function<std::string(ashttp3lib::h1::Request&)>>>
+                      std::function<std::string(ashttp3lib::h1::Request&)>>>
     routes_;
  
  public:
-  Http3Server(std::string, std::string);
+  Http3Server(std::string, std::string, bool);
   void run();
 
  private:
   void timeout_cb(EV_P_ ev_timer* w, int revents);
   void recv_cb(EV_P_ ev_io* w, int revents);
   int for_each_header(uint8_t* name, size_t name_len, uint8_t* value,
-                             size_t value_len, void* argp);
+                      size_t value_len, void* argp);
   struct conn_io* create_conn(uint8_t* scid, size_t scid_len,
-                                     uint8_t* odcid, size_t odcid_len,
-                                     struct sockaddr* local_addr,
-                                     socklen_t local_addr_len,
-                                     struct sockaddr_storage* peer_addr,
-                                     socklen_t peer_addr_len);
+                              uint8_t* odcid, size_t odcid_len,
+                              struct sockaddr* local_addr,
+                              socklen_t local_addr_len,
+                              struct sockaddr_storage* peer_addr,
+                              socklen_t peer_addr_len);
   uint8_t* gen_cid(uint8_t* cid, size_t cid_len);
   bool validate_token(const uint8_t* token, size_t token_len,
-                             struct sockaddr_storage* addr, socklen_t addr_len,
-                             uint8_t* odcid, size_t* odcid_len);
+                      struct sockaddr_storage* addr, socklen_t addr_len,
+                      uint8_t* odcid, size_t* odcid_len);
   void mint_token(const uint8_t* dcid, size_t dcid_len,
-                         struct sockaddr_storage* addr, socklen_t addr_len,
-                         uint8_t* token, size_t* token_len);
+                  struct sockaddr_storage* addr, socklen_t addr_len,
+                  uint8_t* token, size_t* token_len);
   void flush_egress(struct ev_loop* loop, struct conn_io* conn_io);
   void debug_log(const char* line, void* argp);
   void add_route(std::string method, std::string path, CallbackFunction request);
 };
 
-Http3Server::Http3Server(std::string host_in, std::string port_in) {
+Http3Server::Http3Server(std::string host_in, std::string port_in, bool enable_debug) {
   this->host = std::move(host_in);
   this->port = std::move(port_in);
   const struct addrinfo hints = {.ai_family = PF_UNSPEC,
                                  .ai_socktype = SOCK_DGRAM,
                                  .ai_protocol = IPPROTO_UDP};
 
-  quiche_enable_debug_logging(debug_log, NULL);
+  if(enable_debug) quiche_enable_debug_logging(debug_log, NULL);
 
   if (getaddrinfo(host.c_str(), port.c_str(), &hints, &local) != 0) {
     perror("failed to resolve host");
