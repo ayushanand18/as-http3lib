@@ -308,7 +308,7 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
           fprintf(stderr, "failed to create vneg packet: %zd\n", written);
           continue;
         }
-
+      
         ssize_t sent = sendto(conns->sock, out, written, 0,
                               (struct sockaddr*)&peer_addr, peer_addr_len);
         if (sent != written) {
@@ -420,6 +420,21 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
               fprintf(stderr, "failed to process headers\n");
             }
 
+            
+            break;
+          }
+
+          case QUICHE_H3_EVENT_DATA: {
+            // TODO: parse the body also of the incoming request
+            fprintf(stderr, "got HTTP data\n");
+            break;
+          }
+
+          case QUICHE_H3_EVENT_FINISHED:
+            // TODO: return the response of the request after processing
+            //       send the respnse body according to the callback
+            //       function on the requested route and method
+            //       do not send the body right now, send in EVENT_FINISHED
             // TODO response headers are being setup here, edit accordingly
             //      for setting up the right content-length according to body
             quiche_h3_header headers[] = {
@@ -449,26 +464,24 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
                 },
             };
 
+            auto response = new H3response;
+            if(this->routes_.find(path) == this->routes_.end()) {
+              response.set_status("404");
+              response.set_body("Not Found");
+            } else if(this->routes_.at(path).find(method) == this->routes_.at(path).end()) {
+              response.set_status("405");
+              response.set_body("Method Not Allowed");
+            } else {
+              response.set_status("200");
+              response.set_body(routes_.at(path).at(method)(request));
+            }
+
             // TODO: do not send the headers right now, delay to event finisdhed
             quiche_h3_send_response(conn_io->http3, conn_io->conn, s, headers,
                                     3, false);
 
-            // TODO: send the respnse body according to the callback
-            //       function on the requested route and method
-            //       do not send the body right now, send in EVENT_FINISHED
             quiche_h3_send_body(conn_io->http3, conn_io->conn, s,
-                                (uint8_t*)"byez\n", 5, true);
-            break;
-          }
-
-          case QUICHE_H3_EVENT_DATA: {
-            // TODO: parse the body also of the incoming request
-            fprintf(stderr, "got HTTP data\n");
-            break;
-          }
-
-          case QUICHE_H3_EVENT_FINISHED:
-            // TODO: return the response of the request after processing
+                                (uint8_t*)this->serialize_response(response), sizeof(response), true);
             break;
 
           case QUICHE_H3_EVENT_RESET:
@@ -666,6 +679,10 @@ void Http3Server::debug_log(const char* line, void* argp) {
 
 void Http3Server::add_route(std::string method, std::string path, CallbackFunction bind_func) {
   routes_[path][method] = bind_func;
+}
+
+void Http3Server::serialize_response(ashttp3lib::H3Response Response) {
+  // serialise into a string (JSON/MSGPACK)
 }
 
 }  // namespace ashttp3lib
