@@ -50,6 +50,8 @@
 
 #include <quiche.h>
 
+#include <h3request.h>
+
 namespace ashttp3lib {
 const int LOCAL_CONN_ID_LEN = 16;
 const int MAX_DATAGRAM_SIZE = 1350;
@@ -407,19 +409,17 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
 
         // define a new H3Request Object, and pass it down
         // to get the headers, and body of the request
-        // auto request = new ashttp3lib::H3Request
+        ashttp3lib::H3Request request;
         switch (quiche_h3_event_type(ev)) {
           case QUICHE_H3_EVENT_HEADERS: {
             // an event loop handles parsing of headers -> asynchronous processing
-            int rc = quiche_h3_event_for_each_header(ev, for_each_header, NULL);
-            // int rc = quiche_h3_event_for_each_header(ev, for_each_header, &request);
+            int rc = quiche_h3_event_for_each_header(ev, for_each_header, &request);
 
             // TODO: if there is a failure in parsing of headers
             //       return a status code of 500 Internal Server Error
             if (rc != 0) {
               fprintf(stderr, "failed to process headers\n");
             }
-
             
             break;
           }
@@ -431,6 +431,18 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
           }
 
           case QUICHE_H3_EVENT_FINISHED:
+            ashttp3lib::H3Response response;
+            if(this->routes_.find(path) == this->routes_.end()) {
+              response.set_status("404");
+              response.set_body("Not Found");
+            } else if(this->routes_.at(path).find(method) == this->routes_.at(path).end()) {
+              response.set_status("405");
+              response.set_body("Method Not Allowed");
+            } else {
+              response.set_status("200");
+              response.set_body(routes_.at(path).at(method)(request));
+            }
+
             // TODO: return the response of the request after processing
             //       send the respnse body according to the callback
             //       function on the requested route and method
@@ -445,7 +457,6 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
                     .value = (const uint8_t*)"200",
                     .value_len = sizeof("200") - 1,
                 },
-
                 {
                     .name = (const uint8_t*)"server",
                     .name_len = sizeof("server") - 1,
@@ -453,30 +464,15 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
                     .value = (const uint8_t*)"quiche",
                     .value_len = sizeof("quiche") - 1,
                 },
-
-                // TODO: set the right content-length according to body in response
                 {
                     .name = (const uint8_t*)"content-length",
                     .name_len = sizeof("content-length") - 1,
 
-                    .value = (const uint8_t*)"5",
-                    .value_len = sizeof("5") - 1,
+                    .value = (const uint8_t*)(sizeof(response)),
+                    .value_len = sizeof(sizeof(response)) - 1,
                 },
             };
 
-            auto response = new H3response;
-            if(this->routes_.find(path) == this->routes_.end()) {
-              response.set_status("404");
-              response.set_body("Not Found");
-            } else if(this->routes_.at(path).find(method) == this->routes_.at(path).end()) {
-              response.set_status("405");
-              response.set_body("Method Not Allowed");
-            } else {
-              response.set_status("200");
-              response.set_body(routes_.at(path).at(method)(request));
-            }
-
-            // TODO: do not send the headers right now, delay to event finisdhed
             quiche_h3_send_response(conn_io->http3, conn_io->conn, s, headers,
                                     3, false);
 
