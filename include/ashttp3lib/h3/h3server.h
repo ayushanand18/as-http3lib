@@ -51,6 +51,7 @@
 #include <quiche.h>
 
 #include <h3request.h>
+#include <h3response.h>
 
 namespace ashttp3lib {
 const int LOCAL_CONN_ID_LEN = 16;
@@ -418,6 +419,8 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
             // TODO: if there is a failure in parsing of headers
             //       return a status code of 500 Internal Server Error
             if (rc != 0) {
+              response.set_status("500");
+              response.set_body("Failed to process headers. Internal Server Error");
               fprintf(stderr, "failed to process headers\n");
             }
             
@@ -444,40 +447,19 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
             }
 
             // TODO: return the response of the request after processing
-            //       send the respnse body according to the callback
+            //       send the response body according to the callback
             //       function on the requested route and method
             //       do not send the body right now, send in EVENT_FINISHED
             // TODO response headers are being setup here, edit accordingly
             //      for setting up the right content-length according to body
-            quiche_h3_header headers[] = {
-                {
-                    .name = (const uint8_t*)":status",
-                    .name_len = sizeof(":status") - 1,
-
-                    .value = (const uint8_t*)"200",
-                    .value_len = sizeof("200") - 1,
-                },
-                {
-                    .name = (const uint8_t*)"server",
-                    .name_len = sizeof("server") - 1,
-
-                    .value = (const uint8_t*)"quiche",
-                    .value_len = sizeof("quiche") - 1,
-                },
-                {
-                    .name = (const uint8_t*)"content-length",
-                    .name_len = sizeof("content-length") - 1,
-
-                    .value = (const uint8_t*)(sizeof(response)),
-                    .value_len = sizeof(sizeof(response)) - 1,
-                },
-            };
-
-            quiche_h3_send_response(conn_io->http3, conn_io->conn, s, headers,
-                                    3, false);
+            response.add_headers("server", "ashttp3lib");
+            response.add_headers("content-length", string(response.get_content_len())));
+            
+            quiche_h3_send_response(conn_io->http3, conn_io->conn, s, response.get_headers(),
+                                    response.get_header_len(), false);
 
             quiche_h3_send_body(conn_io->http3, conn_io->conn, s,
-                                (uint8_t*)this->serialize_response(response), sizeof(response), true);
+                                (uint8_t*)response.serialize_response(), sizeof(response), true);
             break;
 
           case QUICHE_H3_EVENT_RESET:
@@ -527,9 +509,10 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
 
 int Http3Server::for_each_header(uint8_t* name, size_t name_len, uint8_t* value,
                                  size_t value_len, void* argp) {
-  // TODO: headers are parsed here and printed to the command line
-  //       create a new function to handle according to the header
-  //       and add reading of routes and methods
+  // parse the headers and add them to request object
+  ashttp3lib::H3Request *request = (ashttp3lib::H3Request*)argp;
+  request->add_headers(std::string(name, name_len), std::string(value, value_len));
+
   fprintf(stderr, "got HTTP header: %.*s=%.*s\n", (int)name_len, name,
           (int)value_len, value);
 
