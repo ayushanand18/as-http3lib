@@ -660,8 +660,4 @@ void Http3Server::add_route(std::string method, std::string path, CallbackFuncti
   routes_[path][method] = bind_func;
 }
 
-void Http3Server::serialize_response(ashttp3lib::H3Response Response) {
-  // serialise into a string (JSON/MSGPACK)
-}
-
 }  // namespace ashttp3lib
