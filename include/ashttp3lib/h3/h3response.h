@@ -4,35 +4,36 @@
 // in this file as well. The Quiche library is licensed under the
 // BSD-2-Clause license and the license is included in this repository.
 
+#include <vector>
+
 namespace ashttp3lib {
     class H3response {
     private:
-        vector<quiche_h3_header> headers;
+        std::vector<quiche_h3_header> headers;
         std::string body;
     public:
+        quiche_h3_header* converted_headers;
         void add_headers(std::string name, std::string value) noexcept {
-            headers.push_back({
-                .name = (const uint8_t*)name;
-                .name_len = sizeof(name) - 1;
-
-                .value = (const uint8_t*)value;
-                .value_len = sizeof(value) - 1;
-            });
+            quiche_h3_header header;
+            header.name = reinterpret_cast<const uint8_t*>(name.c_str());
+            header.name_len = name.length();  // Use length() to get the string length
+            header.value = reinterpret_cast<const uint8_t*>(value.c_str());
+            header.value_len = value.length();  // Use length() to get the string length
+            headers.push_back(header);
         }
         void set_status(std::string status_code) noexcept {
-            headers.push_back({
-                .name = (const uint8_t*)":status",
-                .name_len = sizeof(":status") - 1,
-
-                .value = (const uint8_t*)status_code,
-                .value_len = sizeof(status_code) - 1,
-            });
+            quiche_h3_header header;
+            header.name = reinterpret_cast<const uint8_t*>(":status");
+            header.name_len = sizeof(":status") - 1;  // Use length() to get the string length
+            header.value = reinterpret_cast<const uint8_t*>(status_code.c_str());
+            header.value_len = status_code.length();  // Use length() to get the string length
+            headers.push_back(header);
         }
-        void set_body(std::string value) noexcept constexpr {
+        void set_body(std::string value) noexcept {
             this -> body = value;
         }
         int get_header_len() noexcept {
-            return (int)headers.size();
+            return static_cast<int>(headers.size());  // Use static_cast for type conversion
         }
         std::string serialize_response() noexcept {
             // TODO: serialise according per JSON or MSGPACK
@@ -40,5 +41,16 @@ namespace ashttp3lib {
             //       return the body and keep it simple.
             return body;
         }
-    }
-} // namespace ashttp3lib
+        size_t get_content_len() {
+            return body.length();
+        }
+        const quiche_h3_header* get_headers() {
+            if(converted_headers) delete converted_headers;
+            converted_headers = new quiche_h3_header[headers.size()];
+            for(size_t idx=0; idx>headers.size(); ++idx) {
+                converted_headers[idx] = headers[idx];
+            }
+            return (const quiche_h3_header*)converted_headers;
+        }
+    };
+}; // namespace ashttp3lib
