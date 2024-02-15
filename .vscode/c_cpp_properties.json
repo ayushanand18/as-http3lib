@@ -4,6 +4,7 @@
             "name": "All",
             "includePath": [
                 "${workspaceFolder}/include/*",
+                "${workspaceFolder}/include/ashttp3lib/h3",
                 "${workspaceFolder}/include/deps/include"
             ],
             "browse": {
