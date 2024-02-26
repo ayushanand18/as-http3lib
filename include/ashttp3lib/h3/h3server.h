@@ -435,12 +435,10 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
             int rc =
                 quiche_h3_event_for_each_header(ev, for_each_header, &request);
 
-            // TODO: if there is a failure in parsing of headers
-            //       return a status code of 500 Internal Server Error
             if (rc != 0) {
-              response.set_status("500");
+              response.set_status("422");
               response.set_body(
-                  "Failed to process headers. Internal Server Error");
+                  "Unprocessable Entity.");
               fprintf(stderr, "failed to process headers\n");
             }
 
@@ -462,18 +460,13 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
                        this->routes_.at(request.get_path()).end()) {
               response.set_status("405");
               response.set_body("Method Not Allowed");
-            } else {
+            } else if (response.is_ok()) {
+              // process the bound function only if there's no error
               response.set_status("200");
               response.set_body(routes_.at(request.get_path())
                                     .at(request.get_method())(request));
             }
 
-            // TODO: return the response of the request after processing
-            //       send the response body according to the callback
-            //       function on the requested route and method
-            //       do not send the body right now, send in EVENT_FINISHED
-            // TODO response headers are being setup here, edit accordingly
-            //      for setting up the right content-length according to body
             response.add_headers("server", "ashttp3lib");
             response.add_headers("content-length",
                                  std::to_string(response.get_content_len()));

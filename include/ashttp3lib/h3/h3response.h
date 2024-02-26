@@ -11,7 +11,9 @@ namespace ashttp3lib {
     private:
         std::vector<quiche_h3_header> headers;
         std::string body;
+        bool isError;
     public:
+        H3response(): isError(false), body("") {}
         quiche_h3_header* converted_headers;
         void add_headers(std::string name, std::string value) noexcept {
             quiche_h3_header header;
@@ -28,6 +30,11 @@ namespace ashttp3lib {
             header.value = reinterpret_cast<const uint8_t*>(status_code.c_str());
             header.value_len = status_code.length();  // Use length() to get the string length
             headers.push_back(header);
+
+            if(status[0] > '3') {
+                // means the sattus code is in range of 400-500
+                this -> isError = true;
+            }
         }
         void set_body(std::string value) noexcept {
             this -> body = value;
@@ -51,6 +58,9 @@ namespace ashttp3lib {
                 converted_headers[idx] = headers[idx];
             }
             return (const quiche_h3_header*)converted_headers;
+        }
+        bool is_ok() {
+            return !isError;
         }
     };
 }; // namespace ashttp3lib
