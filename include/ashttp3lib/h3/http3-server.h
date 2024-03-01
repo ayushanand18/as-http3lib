@@ -50,11 +50,6 @@
 
 #include <quiche.h>
 
-#include <h3request.h>
-#include <h3response.h>
-#include <functional>
-#include <unordered_map>
-
 namespace ashttp3lib {
 const int LOCAL_CONN_ID_LEN = 16;
 const int MAX_DATAGRAM_SIZE = 1350;
@@ -93,27 +88,20 @@ static quiche_h3_config* http3_config = NULL;
 
 static struct connections* conns = NULL;
 
-typedef std::function<std::string(ashttp3lib::H3request&)> CallbackFunction;
-
 class Http3Server {
  private:
   struct addrinfo* local;
   int sock;
   std::string host;
   std::string port;
-  std::unordered_map<
-      std::string,
-      std::unordered_map<std::string,
-                         std::function<std::string(ashttp3lib::H3request&)>>>
-      routes_;
 
  public:
-  Http3Server(std::string, std::string, bool);
+  Http3Server(std::string, std::string);
   void run();
 
  private:
-  void timeout_cb(EV_P_ ev_timer* w, int revents);
-  void recv_cb(EV_P_ ev_io* w, int revents);
+  static void timeout_cb(EV_P_ ev_timer* w, int revents);
+  static void recv_cb(EV_P_ ev_io* w, int revents);
   static int for_each_header(uint8_t* name, size_t name_len, uint8_t* value,
                              size_t value_len, void* argp);
   static struct conn_io* create_conn(uint8_t* scid, size_t scid_len,
@@ -122,41 +110,25 @@ class Http3Server {
                                      socklen_t local_addr_len,
                                      struct sockaddr_storage* peer_addr,
                                      socklen_t peer_addr_len);
-  uint8_t* gen_cid(uint8_t* cid, size_t cid_len);
-  bool validate_token(const uint8_t* token, size_t token_len,
-                      struct sockaddr_storage* addr, socklen_t addr_len,
-                      uint8_t* odcid, size_t* odcid_len);
-  void mint_token(const uint8_t* dcid, size_t dcid_len,
-                  struct sockaddr_storage* addr, socklen_t addr_len,
-                  uint8_t* token, size_t* token_len);
-  void flush_egress(struct ev_loop* loop, struct conn_io* conn_io);
+  static uint8_t* gen_cid(uint8_t* cid, size_t cid_len);
+  static bool validate_token(const uint8_t* token, size_t token_len,
+                             struct sockaddr_storage* addr, socklen_t addr_len,
+                             uint8_t* odcid, size_t* odcid_len);
+  static void mint_token(const uint8_t* dcid, size_t dcid_len,
+                         struct sockaddr_storage* addr, socklen_t addr_len,
+                         uint8_t* token, size_t* token_len);
+  static void flush_egress(struct ev_loop* loop, struct conn_io* conn_io);
   static void debug_log(const char* line, void* argp);
-  void add_route(std::string method, std::string path,
-                 CallbackFunction request);
-
-  // helper static functions, wrapper around member methods
-  static void static_recv_cb(struct ev_loop* loop, ev_io* w, int revents) {
-    Http3Server* server = static_cast<Http3Server*>(w->data);
-    server->recv_cb(loop, w, revents);
-  }
-
-  static void static_timeout_cb(struct ev_loop* loop, ev_timer* w,
-                                int revents) {
-    Http3Server* server = static_cast<Http3Server*>(w->data);
-    server->timeout_cb(loop, w, revents);
-  }
 };
 
-Http3Server::Http3Server(std::string host_in, std::string port_in,
-                         bool enable_debug) {
+Http3Server::Http3Server(std::string host_in, std::string port_in) {
   this->host = std::move(host_in);
   this->port = std::move(port_in);
   const struct addrinfo hints = {.ai_family = PF_UNSPEC,
                                  .ai_socktype = SOCK_DGRAM,
                                  .ai_protocol = IPPROTO_UDP};
 
-  if (enable_debug)
-    quiche_enable_debug_logging(debug_log, NULL);
+  quiche_enable_debug_logging(debug_log, NULL);
 
   if (getaddrinfo(host.c_str(), port.c_str(), &hints, &local) != 0) {
     perror("failed to resolve host");
@@ -224,7 +196,7 @@ void Http3Server::run() {
 
   struct ev_loop* loop = ev_default_loop(0);
 
-  ev_io_init(&watcher, static_recv_cb, this->sock, EV_READ);
+  ev_io_init(&watcher, recv_cb, this->sock, EV_READ);
   ev_io_start(loop, &watcher);
   watcher.data = &c;
 
@@ -416,7 +388,7 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
       }
 
       while (1) {
-        // each connection can be idenfied with this, therefore process anything
+        // each connection can be idenfied with this, therefore process anything 
         // related to the request with this string. maybe construct an asio
         // queue of response object and send them
         int64_t s = quiche_h3_conn_poll(conn_io->http3, conn_io->conn, &ev);
@@ -425,29 +397,57 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
           break;
         }
 
-        // define a new H3Request Object, and pass it down
-        // to get the headers, and body of the request
-        ashttp3lib::H3request request;
-        ashttp3lib::H3response response;
         switch (quiche_h3_event_type(ev)) {
           case QUICHE_H3_EVENT_HEADERS: {
             // an event loop handles parsing of headers -> asynchronous processing
-            int rc =
-                quiche_h3_event_for_each_header(ev, for_each_header, &request);
-
+            int rc = quiche_h3_event_for_each_header(ev, for_each_header, NULL);
+            // TODO: if there is a failure in parsing of headers
+            //       return a status code of 500 Internal Server Error
             if (rc != 0) {
-              response.set_status("422");
-              response.set_body(
-                  "Unprocessable Entity.");
               fprintf(stderr, "failed to process headers\n");
             }
 
+            // TODO response headers are being setup here, edit accordingly
+            //      for setting up the right content-length according to body
+            quiche_h3_header headers[] = {
+                {
+                    .name = (const uint8_t*)":status",
+                    .name_len = sizeof(":status") - 1,
+
+                    .value = (const uint8_t*)"200",
+                    .value_len = sizeof("200") - 1,
+                },
+
+                {
+                    .name = (const uint8_t*)"server",
+                    .name_len = sizeof("server") - 1,
+
+                    .value = (const uint8_t*)"quiche",
+                    .value_len = sizeof("quiche") - 1,
+                },
+
+                // TODO: set the right content-length according to body in response
+                {
+                    .name = (const uint8_t*)"content-length",
+                    .name_len = sizeof("content-length") - 1,
+
+                    .value = (const uint8_t*)"5",
+                    .value_len = sizeof("5") - 1,
+                },
+            };
+
+            quiche_h3_send_response(conn_io->http3, conn_io->conn, s, headers,
+                                    3, false);
+
+            // TODO: send the respnse body according to the callback
+            //       function on the requested route and method
+            quiche_h3_send_body(conn_io->http3, conn_io->conn, s,
+                                (uint8_t*)"byez\n", 5, true);
             break;
           }
 
           case QUICHE_H3_EVENT_DATA: {
-            // TODO: parse the body also of the incoming request
-            for (;;) {
+           Z for (;;) {
               ssize_t len = quiche_h3_recv_body(conn_io->http3,
                                                 conn_io->conn, s,
                                                 buf, sizeof(buf));
@@ -462,32 +462,6 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
           }
 
           case QUICHE_H3_EVENT_FINISHED:
-            if (this->routes_.find(request.get_path()) == this->routes_.end()) {
-              response.set_status("404");
-              response.set_body("Not Found");
-            } else if (this->routes_.at(request.get_path())
-                           .find(request.get_method()) ==
-                       this->routes_.at(request.get_path()).end()) {
-              response.set_status("405");
-              response.set_body("Method Not Allowed");
-            } else if (response.is_ok()) {
-              // process the bound function only if there's no error
-              response.set_status("200");
-              response.set_body(routes_.at(request.get_path())
-                                    .at(request.get_method())(request));
-            }
-
-            response.add_headers("server", "ashttp3lib");
-            response.add_headers("content-length",
-                                 std::to_string(response.get_content_len()));
-
-            quiche_h3_send_response(conn_io->http3, conn_io->conn, s,
-                                    response.get_headers(),
-                                    response.get_header_len(), false);
-
-            quiche_h3_send_body(conn_io->http3, conn_io->conn, s,
-                                (uint8_t*)response.serialize_response().c_str(),
-                                sizeof(response), true);
             break;
 
           case QUICHE_H3_EVENT_RESET:
@@ -502,8 +476,6 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
           }
         }
 
-        // deallocate the request object constructed
-        // delete request;
         quiche_h3_event_free(ev);
       }
     }
@@ -537,12 +509,9 @@ void Http3Server::recv_cb(EV_P_ ev_io* w, int revents) {
 
 int Http3Server::for_each_header(uint8_t* name, size_t name_len, uint8_t* value,
                                  size_t value_len, void* argp) {
-  // parse the headers and add them to request object
-  ashttp3lib::H3request* request = (ashttp3lib::H3request*)argp;
-  request->add_headers(
-      std::string(reinterpret_cast<const char*>(name), name_len),
-      std::string(reinterpret_cast<const char*>(value), value_len));
-
+  // TODO: headers are parsed here and printed to the command line
+  //       create a new function to handle according to the header
+  //       and add reading of routes and methods
   fprintf(stderr, "got HTTP header: %.*s=%.*s\n", (int)name_len, name,
           (int)value_len, value);
 
@@ -582,7 +551,7 @@ struct conn_io* Http3Server::create_conn(uint8_t* scid, size_t scid_len,
   memcpy(&conn_io->peer_addr, peer_addr, peer_addr_len);
   conn_io->peer_addr_len = peer_addr_len;
 
-  ev_init(&conn_io->timer, static_timeout_cb);
+  ev_init(&conn_io->timer, timeout_cb);
   conn_io->timer.data = conn_io;
 
   HASH_ADD(hh, conns->h, cid, LOCAL_CONN_ID_LEN, conn_io);
@@ -684,11 +653,6 @@ void Http3Server::flush_egress(struct ev_loop* loop, struct conn_io* conn_io) {
 
 void Http3Server::debug_log(const char* line, void* argp) {
   fprintf(stderr, "%s\n", line);
-}
-
-void Http3Server::add_route(std::string method, std::string path,
-                            CallbackFunction bind_func) {
-  routes_[path][method] = bind_func;
 }
 
 }  // namespace ashttp3lib
