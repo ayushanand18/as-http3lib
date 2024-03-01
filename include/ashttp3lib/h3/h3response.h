@@ -13,7 +13,10 @@ namespace ashttp3lib {
         std::string body;
         bool isError;
     public:
-        H3response(): isError(false), body("") {}
+        H3response() {
+            this->isError = false;
+            this->body = "";
+        }
         quiche_h3_header* converted_headers;
         void add_headers(std::string name, std::string value) noexcept {
             quiche_h3_header header;
@@ -63,4 +66,4 @@ namespace ashttp3lib {
             return !isError;
         }
     };
-}; // namespace ashttp3lib
+} // namespace ashttp3lib
