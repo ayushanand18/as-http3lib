@@ -31,7 +31,7 @@ namespace ashttp3lib {
             header.value_len = status_code.length();  // Use length() to get the string length
             headers.push_back(header);
 
-            if(status[0] > '3') {
+            if(status_code[0] > '3') {
                 // means the sattus code is in range of 400-500
                 this -> isError = true;
             }
