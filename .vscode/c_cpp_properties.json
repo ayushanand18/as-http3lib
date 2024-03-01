@@ -1,11 +1,11 @@
 {
     "configurations": [
         {
-            "name": "Your Configuration Name",
+            "name": "All",
             "includePath": [
-                "${workspaceFolder}/**",
-                "${workspaceFolder}/include/"
-                // Add more paths as needed
+                "${workspaceFolder}/include/*",
+                "${workspaceFolder}/include/ashttp3lib/h3",
+                "${workspaceFolder}/include/deps/include"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
