@@ -6,9 +6,6 @@
 Some stats:
 * Minimal version 138x (138 times) faster on startup time than FastAPI based server (equal endpoints and configs).
 
-## Design
-+ [Miro Board](https://miro.com/app/board/uXjVN645xLw=/?share_link_id=143978576535)
-
 ## Benchmarks
 During the development of this project, we ran a few benchmarks to evaluate the 
 performance of this library against a few popular libraries. The results are illustrated
