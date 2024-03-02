@@ -72,8 +72,9 @@ Startup Time     | 0.005 s         | 0.681 s        | 0.014 s
 ## Acknowledgements
 Other performant libraries form the backbone of this repository, and made it possible to build. We 
 utilise the following open source libraries for developing `ashttp3lib`
-* `cloudflare/quiche`
-* `google/boringssl`
-* `libev`
+- `cloudflare/quiche`
+- `google/boringssl`
+- [libev](http://software.schmorp.de/pkg/libev.html)
+- [uthash](https://troydhanson.github.io/uthash/)
 
 Thanks!
