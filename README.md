@@ -68,6 +68,9 @@ RRT (p95)        | 8.97 ms         | 9.34 ms        | 7.74 ms
 > offset system load irregularities however these figure might (and probably shall) differ on
 > each and every run.
 
+- 41.54% faster than FastAPI (p90).
+- 17.13% faster than FastAPI (p95).
+
 ## Acknowledgements
 Other performant libraries form the backbone of this repository, and made it possible to build. We 
 utilise the following open source libraries for developing `ashttp3lib`
