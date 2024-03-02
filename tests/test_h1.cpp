@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../ashttp3lib/h1/request.hpp"
+#include <ashttp3lib/h1/request.hpp>
 
 // Test case for ashttp3lib::h1::utils::split() function
 TEST(AsHttp3LibTest, SplitFunction) {
