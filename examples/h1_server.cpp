@@ -1,4 +1,4 @@
-#include "../ashttp3lib/h1/server.hpp"
+#include <ashttp3lib/h1/server.hpp>
 
 std::string handleGetRequest(ashttp3lib::h1::Request& request_packet) {
   return "Handling GET request: " + request_packet.path;
