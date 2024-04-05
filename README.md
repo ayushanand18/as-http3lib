@@ -2,6 +2,14 @@
 > An Asynchronous HTTP/1.1 and HTTP/3 based Server Library with support of
 > concurrency using Event Loop (using `libev`) and native Linux Primitives.
 
+## Installation
+> Currently the compiled static libraries support only Linux based distros (tested only on Ubuntu 22.04).
+* Before installing the project, make sure you have [`libev`](https://github.com/enki/libev) installed on your machine.
+* Clone this repository on your machine. ANd you are good to go!
+
+This project uses [quiche](https://github.com/cloudflare/quiche) which also uses [boringssl](github.com/google/boringssl). 
+Those who want to go with their own build of static libraries, can build these two libraries from source and add it to `deps/`.
+
 ## Performance
 Some stats:
 * Minimal version 138x (138 times) faster on startup time than FastAPI based server (equal endpoints and configs).
@@ -70,7 +78,6 @@ RRT (p95)        | 8.97 ms         | 9.34 ms        | 7.74 ms
 
 - 41.54% faster than FastAPI (p90).
 - 17.13% faster than FastAPI (p95).
-
 
 ## Examples
 This repository includes examples for building a simple server over [HTTP/1.1](./examples/h1_server.cpp) and [HTTP/3](./examples/http3-server-sample.cpp).
