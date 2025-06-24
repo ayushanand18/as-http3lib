@@ -87,10 +87,7 @@ func (s *server) ListenAndServe(ctx context.Context) error {
 	go func() {
 		log.Println("Starting HTTP/1.1 + Alt-Svc server on", s.http1Server.Addr)
 
-		keyFile := config.GetString(ctx, "service.tls.key.path", "key.pem")
-		certFile := config.GetString(ctx, "service.tls.certificate.path", "cert.pem")
-
-		errChan <- s.http1Server.ListenAndServeTLS(certFile, keyFile)
+		errChan <- s.http1Server.ListenAndServeTLS("", "")
 	}()
 
 	go func() {
