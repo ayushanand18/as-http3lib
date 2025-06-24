@@ -9,6 +9,16 @@ import (
 )
 
 func checkIfTlsCertificateIsMissing(ctx context.Context) bool {
+	keyRawBytes := config.GetBytes(ctx, "service.tls.key.raw")
+	if len(keyRawBytes) > 0 {
+		return false
+	}
+
+	certRawBytes := config.GetBytes(ctx, "service.tls.certificate.raw")
+	if len(certRawBytes) > 0 {
+		return false
+	}
+
 	var keyFile, certFile string
 
 	keyFile = config.GetString(ctx, "service.tls.key.path", "key.pem")
