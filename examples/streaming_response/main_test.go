@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -20,8 +19,6 @@ import (
 func TestHTTP3Server_BasicStreamingResponse(t *testing.T) {
 	ctx := context.Background()
 	addr := "localhost:4434"
-
-	os.Setenv("SERVICE_LISTEN_ADDRESS", addr)
 
 	s := http3.NewServer(ctx)
 	if err := s.Initialize(ctx); err != nil {

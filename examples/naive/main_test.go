@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"testing"
 	"time"
 
@@ -19,7 +18,6 @@ import (
 func TestUserRoute_NaiveGETRequest(t *testing.T) {
 	ctx := context.Background()
 	addr := "localhost:4433"
-	os.Setenv("SERVICE_LISTEN_ADDRESS", addr)
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
@@ -40,20 +38,6 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 				Body:       []byte("Hello World from GET."),
 			}
 		},
-	})
-	if err != nil {
-		t.Fatalf("AddServeMethod failed: %v", err)
-	}
-
-	err = server.AddServeMethod(ctx, types.ServeOptions{
-		URL: "/test",
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Body:       []byte("Hello World from POST."),
-			}
-		},
-		Method: "POST",
 	})
 	if err != nil {
 		t.Fatalf("AddServeMethod failed: %v", err)
@@ -95,7 +79,6 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 func TestUserRoute_NaivePOSTRequest(t *testing.T) {
 	ctx := context.Background()
 	addr := "localhost:4433"
-	os.Setenv("SERVICE_LISTEN_ADDRESS", addr)
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
@@ -112,20 +95,6 @@ func TestUserRoute_NaivePOSTRequest(t *testing.T) {
 				Body:       []byte("Hello World from POST."),
 			}
 		},
-	})
-	if err != nil {
-		t.Fatalf("AddServeMethod failed: %v", err)
-	}
-
-	err = server.AddServeMethod(ctx, types.ServeOptions{
-		URL: "/test",
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Body:       []byte("Hello World from POST."),
-			}
-		},
-		Method: "POST",
 	})
 	if err != nil {
 		t.Fatalf("AddServeMethod failed: %v", err)

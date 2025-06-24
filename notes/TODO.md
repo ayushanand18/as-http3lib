@@ -14,7 +14,7 @@
     + [x] Implement slug based request handling
     + [x] Implement JSON responses
     + [x] Implement streaming responses
-    + [x] Implement media responses
+    + [ ] Implement media responses
 5. Documentation
     + [ ] compiler using `doxygen`
 6. Unit Tests

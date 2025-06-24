@@ -95,6 +95,8 @@ func (s *server) AddServeMethod(ctx context.Context, options types.ServeOptions)
 			}
 
 			switch options.ResponseType {
+			case constants.RESPONSE_TYPE_JSON_RESPONSE:
+				jsonDefaultHandler(r.Context(), w, options, handler, r)
 			case constants.RESPONSE_TYPE_STREAMING_RESPONSE:
 				streamingDefaultHandler(r.Context(), w, options, handler, r)
 			default:
