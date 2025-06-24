@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"io"
 	"log"
 	"net/http"
 
@@ -20,16 +19,22 @@ func main() {
 
 	server.AddServeMethod(ctx, types.ServeOptions{
 		URL: "/test",
-		Handler: func(w http.ResponseWriter, r *http.Request) {
-			io.WriteString(w, "Hello World from GET.")
+		Handler: func(ctx context.Context, r *http.Request) *types.HttpResponse {
+			return &types.HttpResponse{
+				StatusCode: 200,
+				Body:       []byte("Hello World from GET."),
+			}
 		},
 		Method: "GET",
 	})
 
 	server.AddServeMethod(ctx, types.ServeOptions{
 		URL: "/test",
-		Handler: func(w http.ResponseWriter, r *http.Request) {
-			io.WriteString(w, "Hello World from POST.")
+		Handler: func(ctx context.Context, r *http.Request) *types.HttpResponse {
+			return &types.HttpResponse{
+				StatusCode: 200,
+				Body:       []byte("Hello World from POST."),
+			}
 		},
 		Method: "POST",
 	})
