@@ -17,7 +17,7 @@ import (
 type server struct {
 	h3Server      qchttp3.Server
 	mux           *http.ServeMux
-	routeMatchMap map[string]map[constants.HttpMethodTypes]http.HandlerFunc
+	routeMatchMap map[string]map[constants.HttpMethodTypes]types.HandlerFunc
 }
 
 type Server interface {
@@ -33,7 +33,7 @@ func NewServer(ctx context.Context) Server {
 			Handler: nil,
 		},
 		mux:           http.NewServeMux(),
-		routeMatchMap: make(map[string]map[constants.HttpMethodTypes]http.HandlerFunc),
+		routeMatchMap: make(map[string]map[constants.HttpMethodTypes]types.HandlerFunc),
 	}
 }
 
@@ -59,7 +59,7 @@ func (s *server) AddServeMethod(ctx context.Context, options types.ServeOptions)
 	}
 
 	if _, ok := s.routeMatchMap[options.URL]; !ok {
-		s.routeMatchMap[options.URL] = make(map[constants.HttpMethodTypes]http.HandlerFunc)
+		s.routeMatchMap[options.URL] = make(map[constants.HttpMethodTypes]types.HandlerFunc)
 	}
 
 	// if the combination exists, reassign it
@@ -68,7 +68,7 @@ func (s *server) AddServeMethod(ctx context.Context, options types.ServeOptions)
 		s.mux.HandleFunc(options.URL, func(w http.ResponseWriter, r *http.Request) {
 			requestMethod := constants.HttpMethodTypes(strings.ToUpper(r.Method))
 
-			methodHandlers, ok := s.routeMatchMap[r.URL.Path]
+			methodHandlers, ok := s.routeMatchMap[options.URL]
 			if !ok {
 				http.Error(w, "Not Found", http.StatusNotFound)
 				return
@@ -80,7 +80,27 @@ func (s *server) AddServeMethod(ctx context.Context, options types.ServeOptions)
 				return
 			}
 
-			handler(w, r)
+			response := handler(ctx, r)
+			if response.StatusCode == 0 {
+				response.StatusCode = http.StatusOK
+			}
+			w.WriteHeader(response.StatusCode)
+
+			defaultHeaders := injecteConstantHeaders()
+			for key, value := range defaultHeaders {
+				w.Header().Set(key, value)
+			}
+
+			for key, value := range response.Headers {
+				w.Header().Set(key, value)
+			}
+
+			if response.Body != nil {
+				_, err := w.Write(response.Body)
+				if err != nil {
+					panic(err)
+				}
+			}
 		})
 	}
 

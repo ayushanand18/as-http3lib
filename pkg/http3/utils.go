@@ -22,3 +22,10 @@ func checkIfTlsCertificateIsMissing(ctx context.Context) bool {
 
 	return false
 }
+
+func injecteConstantHeaders() map[string]string {
+	defaultHeaders := make(map[string]string)
+	defaultHeaders["X-Server"] = "ashttp3lib"
+
+	return defaultHeaders
+}
