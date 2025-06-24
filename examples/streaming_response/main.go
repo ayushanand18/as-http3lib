@@ -2,9 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/pkg/http3"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 )
@@ -18,25 +21,21 @@ func main() {
 	}
 
 	server.AddServeMethod(ctx, types.ServeOptions{
-		URL: "/test",
+		URL:          "/streaming",
+		ResponseType: constants.RESPONSE_TYPE_STREAMING_RESPONSE,
 		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Body:       []byte("Hello World from GET."),
+			for i := range 5 {
+				time.Sleep(time.Duration(1) * time.Second)
+
+				ctx.Value(constants.STREAMING_RESPONSE_CHANNEL_CONTEXT_KEY).(chan types.StreamChunk) <- types.StreamChunk{
+					Id:   uint32(i),
+					Data: []byte(fmt.Sprintf("Chunk: %d \n\n", i)),
+				}
 			}
+
+			return nil
 		},
 		Method: "GET",
-	})
-
-	server.AddServeMethod(ctx, types.ServeOptions{
-		URL: "/test",
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Body:       []byte("Hello World from POST."),
-			}
-		},
-		Method: "POST",
 	})
 
 	if err := server.ListenAndServe(); err != nil {

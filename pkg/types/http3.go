@@ -8,15 +8,11 @@ import (
 )
 
 type ServeOptions struct {
-	URL     string
-	Handler HandlerFunc
-	Method  constants.HttpMethodTypes
+	URL            string
+	Handler        HandlerFunc
+	Method         constants.HttpMethodTypes
+	ResponseType   constants.ResponseTypes
+	DefaultHeaders map[string]string
 }
 
-type HttpResponse struct {
-	StatusCode int
-	Headers    map[string]string
-	Body       []byte
-}
-
-type HandlerFunc func(context.Context, *http.Request) *HttpResponse
+type HandlerFunc func(context.Context, *http.Request) interface{}
