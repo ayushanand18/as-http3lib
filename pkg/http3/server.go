@@ -12,7 +12,9 @@ import (
 	"github.com/ayushanand18/as-http3lib/internal/tls"
 	"github.com/ayushanand18/as-http3lib/internal/utils"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
+	"github.com/quic-go/quic-go"
 	qchttp3 "github.com/quic-go/quic-go/http3"
+	"github.com/quic-go/quic-go/qlog"
 )
 
 func (h *rootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -43,10 +45,17 @@ type Server interface {
 }
 
 func NewServer(ctx context.Context) Server {
+	quicConfig := &quic.Config{
+		Tracer:          qlog.DefaultConnectionTracer,
+		Allow0RTT:       true,
+		EnableDatagrams: true,
+	}
 	return &server{
 		Server: qchttp3.Server{
-			Addr:    utils.GetListeningAddress(ctx),
-			Handler: nil,
+			Addr:            utils.GetListeningAddress(ctx),
+			Handler:         nil,
+			EnableDatagrams: true,
+			QUICConfig:      quicConfig,
 		},
 		http1Server: http.Server{
 			Addr:    utils.GetHttp1ListeningAddress(ctx),
@@ -73,7 +82,7 @@ func (s *server) Initialize(ctx context.Context) error {
 
 	s.http1Server.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// if on H/1 advertise H/3
-		w.Header().Set("Alt-Svc", fmt.Sprintf(`h3=":%s"`, s.Addr[strings.LastIndex(s.Addr, ":")+1:]))
+		w.Header().Set("Alt-Svc", fmt.Sprintf(`h3=":%s"; ma=2592000`, s.Addr[strings.LastIndex(s.Addr, ":")+1:]))
 		root.ServeHTTP(w, r)
 	})
 	s.http1Server.TLSConfig = tlsConfig
@@ -85,14 +94,14 @@ func (s *server) ListenAndServe(ctx context.Context) error {
 	errChan := make(chan error, 2)
 
 	go func() {
-		log.Println("Starting HTTP/1.1 + Alt-Svc server on", s.http1Server.Addr)
-
-		errChan <- s.http1Server.ListenAndServeTLS("", "")
+		log.Println("Starting HTTP/3 server on", s.Server.Addr)
+		errChan <- s.Server.ListenAndServe()
 	}()
 
 	go func() {
-		log.Println("Starting HTTP/3 server on", s.Server.Addr)
-		errChan <- s.Server.ListenAndServe()
+		log.Println("Starting HTTP/1.1 + Alt-Svc server on", s.http1Server.Addr)
+
+		errChan <- s.http1Server.ListenAndServeTLS("", "")
 	}()
 
 	return <-errChan
