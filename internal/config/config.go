@@ -2,7 +2,6 @@ package config
 
 import (
 	"context"
-	"log"
 	"os"
 	"strings"
 	"sync"
@@ -21,7 +20,6 @@ func loadConfig() {
 		file, err := os.ReadFile("config.yaml")
 		if err == nil {
 			loadErr = yaml.Unmarshal(file, &configData)
-			log.Printf("Config: %+v", configData)
 			return
 		}
 		loadErr = err
