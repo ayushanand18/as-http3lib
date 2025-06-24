@@ -3,6 +3,7 @@ package main_test
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,10 +13,16 @@ import (
 	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/pkg/http3"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
+
 	qchttp3 "github.com/quic-go/quic-go/http3"
 )
 
-func TestUserRoute_WithUserIdHeader(t *testing.T) {
+type DummyResponse struct {
+	Key   string `json:"key"`
+	Value uint32 `json:"value"`
+}
+
+func TestUserRoute_NaiveJSONResponse(t *testing.T) {
 	ctx := context.Background()
 	addr := "localhost:4433"
 
@@ -25,17 +32,13 @@ func TestUserRoute_WithUserIdHeader(t *testing.T) {
 	}
 
 	err := server.AddServeMethod(ctx, types.ServeOptions{
-		URL:          "/users/{user_id}",
+		URL:          "/json",
 		Method:       constants.HTTP_METHOD_GET,
-		ResponseType: constants.RESPONSE_TYPE_BASE_RESPONSE,
+		ResponseType: constants.RESPONSE_TYPE_JSON_RESPONSE,
 		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			headers := map[string]string{
-				"X-User-Id": r.PathValue("user_id"),
-			}
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Headers:    headers,
-				Body:       []byte("Hello World from GET."),
+			return DummyResponse{
+				Key:   "test",
+				Value: 123,
 			}
 		},
 	})
@@ -46,17 +49,17 @@ func TestUserRoute_WithUserIdHeader(t *testing.T) {
 	go func() {
 		_ = server.ListenAndServe()
 	}()
-	time.Sleep(500 * time.Millisecond) // Give server time to start
+	time.Sleep(50 * time.Millisecond)
 
 	client := &http.Client{
-		Transport: &qchttp3.RoundTripper{
+		Transport: &qchttp3.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},
 		},
 	}
 
-	resp, err := client.Get(fmt.Sprintf("https://%s/users/123", addr))
+	resp, err := client.Get(fmt.Sprintf("https://%s/json", addr))
 	if err != nil {
 		t.Fatalf("Request failed: %v", err)
 	}
@@ -70,12 +73,11 @@ func TestUserRoute_WithUserIdHeader(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read body: %v", err)
 	}
-	if string(body) != "Hello World from GET." {
-		t.Errorf("Expected body 'Hello World from GET.', got %q", body)
+
+	value := DummyResponse{}
+
+	if err := json.Unmarshal(body, &value); err != nil {
+		t.Errorf("Error while parsing JSON, got %q", body)
 	}
 
-	userID := resp.Header.Get("X-User-Id")
-	if userID != "123" {
-		t.Errorf("Expected X-User-Id=123, got %q", userID)
-	}
 }
