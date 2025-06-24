@@ -2,8 +2,8 @@ package config
 
 import (
 	"context"
+	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -21,22 +21,10 @@ func loadConfig() {
 		file, err := os.ReadFile("config.yaml")
 		if err == nil {
 			loadErr = yaml.Unmarshal(file, &configData)
+			log.Printf("Config: %+v", configData)
 			return
 		}
-
-		exePath, err := os.Executable()
-		if err != nil {
-			loadErr = err
-			return
-		}
-		configPath := filepath.Join(filepath.Dir(exePath), "config.yaml")
-
-		file, err = os.ReadFile(configPath)
-		if err != nil {
-			loadErr = err
-			return
-		}
-		loadErr = yaml.Unmarshal(file, &configData)
+		loadErr = err
 	})
 }
 
