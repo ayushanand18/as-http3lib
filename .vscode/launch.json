@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Run Example: Streaming",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/examples/streaming_response/"
+        },
+        {
             "name": "Run Example: Naive",
             "type": "go",
             "request": "launch",

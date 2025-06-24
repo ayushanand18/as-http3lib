@@ -1,0 +1,12 @@
+service:
+  address:
+    ip: 127.0.0.1
+    port: 4434
+  tls:
+    generate_if_missing: true
+    certificate:
+      raw: ""
+      path: cert.pem
+    key:
+      raw: ""
+      path: key.pem

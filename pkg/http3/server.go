@@ -14,8 +14,22 @@ import (
 	qchttp3 "github.com/quic-go/quic-go/http3"
 )
 
+func (h *rootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	for k, v := range injectConstantHeaders() {
+		w.Header().Set(k, v)
+	}
+
+	rec := &responseRecorder{ResponseWriter: w, status: 0}
+	h.mux.ServeHTTP(rec, r)
+
+	if !rec.wrote {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("404 page not found\n"))
+	}
+}
+
 type server struct {
-	h3Server      qchttp3.Server
+	qchttp3.Server
 	mux           *http.ServeMux
 	routeMatchMap map[string]map[constants.HttpMethodTypes]types.HandlerFunc
 }
@@ -28,7 +42,7 @@ type Server interface {
 
 func NewServer(ctx context.Context) Server {
 	return &server{
-		h3Server: qchttp3.Server{
+		Server: qchttp3.Server{
 			Addr:    utils.GetListeningAddress(ctx),
 			Handler: nil,
 		},
@@ -44,13 +58,13 @@ func (s *server) Initialize(ctx context.Context) error {
 		}
 	}
 
-	s.h3Server.TLSConfig = tls.GenerateTLSConfig(ctx)
-	s.h3Server.Handler = s.mux
+	s.TLSConfig = tls.GenerateTLSConfig(ctx)
+	s.Handler = &rootHandler{mux: s.mux}
 	return nil
 }
 
 func (s *server) ListenAndServe() error {
-	return s.h3Server.ListenAndServe()
+	return s.Server.ListenAndServe()
 }
 
 func (s *server) AddServeMethod(ctx context.Context, options types.ServeOptions) error {
@@ -80,26 +94,11 @@ func (s *server) AddServeMethod(ctx context.Context, options types.ServeOptions)
 				return
 			}
 
-			response := handler(ctx, r)
-			if response.StatusCode == 0 {
-				response.StatusCode = http.StatusOK
-			}
-			w.WriteHeader(response.StatusCode)
-
-			defaultHeaders := injecteConstantHeaders()
-			for key, value := range defaultHeaders {
-				w.Header().Set(key, value)
-			}
-
-			for key, value := range response.Headers {
-				w.Header().Set(key, value)
-			}
-
-			if response.Body != nil {
-				_, err := w.Write(response.Body)
-				if err != nil {
-					panic(err)
-				}
+			switch options.ResponseType {
+			case constants.RESPONSE_TYPE_STREAMING_RESPONSE:
+				streamingDefaultHandler(r.Context(), w, options, handler, r)
+			default:
+				httpDefaultHandler(r.Context(), w, options, handler, r)
 			}
 		})
 	}

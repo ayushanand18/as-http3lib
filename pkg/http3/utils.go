@@ -2,6 +2,7 @@ package http3
 
 import (
 	"context"
+	"net/http"
 	"os"
 
 	"github.com/ayushanand18/as-http3lib/internal/config"
@@ -23,9 +24,13 @@ func checkIfTlsCertificateIsMissing(ctx context.Context) bool {
 	return false
 }
 
-func injecteConstantHeaders() map[string]string {
+func injectConstantHeaders() map[string]string {
 	defaultHeaders := make(map[string]string)
 	defaultHeaders["X-Server"] = "ashttp3lib"
 
 	return defaultHeaders
+}
+
+func getNewContextForRequest(r *http.Request) context.Context {
+	return r.Context()
 }

@@ -19,7 +19,7 @@ func main() {
 
 	server.AddServeMethod(ctx, types.ServeOptions{
 		URL: "/users/{user_id}",
-		Handler: func(ctx context.Context, r *http.Request) *types.HttpResponse {
+		Handler: func(ctx context.Context, r *http.Request) interface{} {
 			headers := make(map[string]string)
 			headers["X-User-Id"] = r.PathValue("user_id")
 

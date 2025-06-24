@@ -13,3 +13,17 @@ const (
 	HTTP_METHOD_CONNECT HttpMethodTypes = "CONNECT"
 	HTTP_METHOD_TRACE   HttpMethodTypes = "TRACE"
 )
+
+type ResponseTypes int
+
+const (
+	RESPONSE_TYPE_BASE_RESPONSE      ResponseTypes = iota
+	RESPONSE_TYPE_STREAMING_RESPONSE ResponseTypes = 1
+	RESPONSE_TYPE_JSON_RESPONSE      ResponseTypes = 2
+)
+
+type ContextKeys string
+
+const (
+	STREAMING_RESPONSE_CHANNEL_CONTEXT_KEY ContextKeys = "response_channel"
+)
