@@ -35,7 +35,7 @@ func main() {
 		Method: "GET",
 	})
 
-	if err := server.ListenAndServe(); err != nil {
+	if err := server.ListenAndServe(ctx); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }

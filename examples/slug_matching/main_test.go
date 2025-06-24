@@ -44,12 +44,12 @@ func TestUserRoute_WithUserIdHeader(t *testing.T) {
 	}
 
 	go func() {
-		_ = server.ListenAndServe()
+		_ = server.ListenAndServe(ctx)
 	}()
-	time.Sleep(500 * time.Millisecond) // Give server time to start
+	time.Sleep(500 * time.Millisecond)
 
 	client := &http.Client{
-		Transport: &qchttp3.RoundTripper{
+		Transport: &qchttp3.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},

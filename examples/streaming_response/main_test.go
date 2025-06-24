@@ -47,12 +47,12 @@ func TestHTTP3Server_BasicStreamingResponse(t *testing.T) {
 	}
 
 	go func() {
-		_ = s.ListenAndServe()
+		_ = s.ListenAndServe(ctx)
 	}()
 	time.Sleep(50 * time.Millisecond)
 
 	client := &http.Client{
-		Transport: &qchttp3.RoundTripper{
+		Transport: &qchttp3.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},

@@ -44,7 +44,7 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 	}
 
 	go func() {
-		_ = server.ListenAndServe()
+		_ = server.ListenAndServe(ctx)
 	}()
 	time.Sleep(50 * time.Millisecond)
 
@@ -101,12 +101,12 @@ func TestUserRoute_NaivePOSTRequest(t *testing.T) {
 	}
 
 	go func() {
-		_ = server.ListenAndServe()
+		_ = server.ListenAndServe(ctx)
 	}()
 	time.Sleep(50 * time.Millisecond)
 
 	client := &http.Client{
-		Transport: &qchttp3.RoundTripper{
+		Transport: &qchttp3.Transport{
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 			},

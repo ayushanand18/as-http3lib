@@ -47,7 +47,7 @@ func TestUserRoute_NaiveJSONResponse(t *testing.T) {
 	}
 
 	go func() {
-		_ = server.ListenAndServe()
+		_ = server.ListenAndServe(ctx)
 	}()
 	time.Sleep(50 * time.Millisecond)
 
