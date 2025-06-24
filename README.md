@@ -1,9 +1,17 @@
 # as-http3lib
 > An HTTP/3 only server library written in pure Go
+> DO NOT USE IN PRODUCTION, WE ARE STILL DEVELOPING AND TESTING THIS LIB
 
 
 > Note: The previous version of this lib was written in C++, but 
 > has since been rewritten in Golang
+
+## Support
+1. Currently supports only HTTP/3 traffic
+2. Self-signed TLS Certificates
+3. All HTTP responses, JSONResponses, Streaming responses
+
+> You can see the pipeline of changes in [/notes/TODO.md](/notes/TODO.md)
 
 ## Installation
 > Import the Go package in your service using
