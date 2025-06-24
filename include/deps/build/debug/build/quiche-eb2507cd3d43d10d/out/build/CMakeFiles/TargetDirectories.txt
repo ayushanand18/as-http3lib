@@ -1,0 +1,5 @@
+/workspaces/as-http3lib/quiche/quiche/examples/build/debug/build/quiche-eb2507cd3d43d10d/out/build/CMakeFiles/rebuild_cache.dir
+/workspaces/as-http3lib/quiche/quiche/examples/build/debug/build/quiche-eb2507cd3d43d10d/out/build/CMakeFiles/edit_cache.dir
+/workspaces/as-http3lib/quiche/quiche/examples/build/debug/build/quiche-eb2507cd3d43d10d/out/build/CMakeFiles/bssl.dir
+/workspaces/as-http3lib/quiche/quiche/examples/build/debug/build/quiche-eb2507cd3d43d10d/out/build/CMakeFiles/ssl.dir
+/workspaces/as-http3lib/quiche/quiche/examples/build/debug/build/quiche-eb2507cd3d43d10d/out/build/CMakeFiles/crypto.dir
