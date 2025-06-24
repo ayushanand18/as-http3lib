@@ -1,16 +1,15 @@
 {
     "configurations": [
         {
-            "name": "All",
+            "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/include/*",
-                "${workspaceFolder}/include/ashttp3lib/h3",
-                "${workspaceFolder}/include/deps/include"
+                "${workspaceFolder}/**"
             ],
-            "browse": {
-                "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": ""
-            }
+            "defines": [],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c17",
+            "intelliSenseMode": "linux-clang-x64",
+            "cppStandard": "c++20"
         }
     ],
     "version": 4
