@@ -75,3 +75,8 @@ func GetBool(ctx context.Context, keyString string, defaultValue bool) bool {
 	}
 	return defaultValue
 }
+
+func GetBytes(ctx context.Context, keyString string) []byte {
+	val := GetValue(ctx, keyString)
+	return []byte(val.(string))
+}

@@ -69,6 +69,7 @@ func (s *server) Initialize(ctx context.Context) error {
 
 	s.Handler = root
 	s.TLSConfig = tlsConfig
+	s.TLSConfig.NextProtos = []string{"h3"}
 
 	s.http1Server.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// if on H/1 advertise H/3

@@ -71,12 +71,25 @@ func GenerateSelfSignedCert(ctx context.Context) error {
 }
 
 func GenerateTLSConfig(ctx context.Context) *tls.Config {
-	var keyFile, certFile string
+	var err error
+	keyBytesRaw := config.GetBytes(ctx, "service.tls.key.raw")
+	if len(keyBytesRaw) <= 0 {
+		keyFile := config.GetString(ctx, "service.tls.key.path", "key.pem")
+		keyBytesRaw, err = os.ReadFile(keyFile)
+		if err != nil {
+			return &tls.Config{}
+		}
+	}
+	certBytesRaw := config.GetBytes(ctx, "service.tls.certificate.raw")
+	if len(certBytesRaw) <= 0 {
+		certFile := config.GetString(ctx, "service.tls.certificate.path", "cert.pem")
+		certBytesRaw, err = os.ReadFile(certFile)
+		if err != nil {
+			return &tls.Config{}
+		}
+	}
 
-	keyFile = config.GetString(ctx, "service.tls.key.path", "key.pem")
-	certFile = config.GetString(ctx, "service.tls.certificate.path", "cert.pem")
-
-	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	cert, err := tls.X509KeyPair(certBytesRaw, keyBytesRaw)
 	if err != nil {
 		log.Fatalf("failed to load TLS key pair: %v", err)
 	}
