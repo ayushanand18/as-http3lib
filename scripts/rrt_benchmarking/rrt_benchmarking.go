@@ -121,7 +121,7 @@ func calculatePercentile(latencies []time.Duration, percentile float64) time.Dur
 
 func main() {
 	const (
-		targetURL    = "https://localhost:4433/"
+		targetURL    = "https://localhost:4433/test"
 		virtualUsers = 50
 		testDuration = 30 * time.Second
 	)
@@ -130,7 +130,7 @@ func main() {
 	fmt.Printf("Virtual Users: %d, Duration: %s\n", virtualUsers, testDuration)
 	fmt.Println("--------------------------------------------------")
 
-	tr := &http3.RoundTripper{
+	tr := &http3.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
 		},
