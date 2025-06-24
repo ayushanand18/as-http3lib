@@ -11,7 +11,11 @@
 
 ## Benchmarks
 > Tests were conducted to compare the performance of this library with existing HTTP Server Libraries.
+> See [README.md](../README.md) for more details
+
+## Before Using
++ Run this to increase the UDP buffer size [https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes](https://github.com/quic-go/quic-go/wiki/UDP-Buffer-Sizes)
 
 
 # Authors
-(c) 2023, Ayush Anand
+(c) 2025, Ayush Anand
