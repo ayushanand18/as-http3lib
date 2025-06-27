@@ -17,7 +17,7 @@ import (
 
 func TestUserRoute_NaiveGETRequest(t *testing.T) {
 	ctx := context.Background()
-	addr := "localhost:4433"
+	addr := "localhost"
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
@@ -49,9 +49,9 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	client := &http.Client{
-		Transport: &qchttp3.RoundTripper{
+		Transport: &qchttp3.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: false,
 			},
 		},
 	}
@@ -78,7 +78,7 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 
 func TestUserRoute_NaivePOSTRequest(t *testing.T) {
 	ctx := context.Background()
-	addr := "localhost:4433"
+	addr := "localhost"
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
@@ -108,7 +108,7 @@ func TestUserRoute_NaivePOSTRequest(t *testing.T) {
 	client := &http.Client{
 		Transport: &qchttp3.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: false,
 			},
 		},
 	}

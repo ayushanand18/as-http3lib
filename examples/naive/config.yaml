@@ -1,7 +1,7 @@
 service:
   address:
-    ip: 127.0.0.1
-    port: 4433
+    ip: ""
+    port: 443
   tls:
     generate_if_missing: true
     certificate:
@@ -11,5 +11,5 @@ service:
       raw: ""
       path: key.pem
   http1_address:
-    ip: 127.0.0.1
-    port: 4431
+    ip: ""
+    port: 443

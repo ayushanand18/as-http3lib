@@ -82,7 +82,7 @@ func (s *server) Initialize(ctx context.Context) error {
 
 	s.http1Server.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// if on H/1 advertise H/3
-		w.Header().Set("Alt-Svc", fmt.Sprintf(`h3=":%s"; ma=2592000`, s.Addr[strings.LastIndex(s.Addr, ":")+1:]))
+		w.Header().Set("Alt-Svc", fmt.Sprintf(`h3=":%s"; ma=2592000,h3-29=":%s"; ma=2592000`, s.Addr[strings.LastIndex(s.Addr, ":")+1:], s.Addr[strings.LastIndex(s.Addr, ":")+1:]))
 		root.ServeHTTP(w, r)
 	})
 	s.http1Server.TLSConfig = tlsConfig
