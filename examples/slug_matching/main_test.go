@@ -17,7 +17,7 @@ import (
 
 func TestUserRoute_WithUserIdHeader(t *testing.T) {
 	ctx := context.Background()
-	addr := "localhost:443"
+	addr := "localhost:4433"
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
@@ -51,7 +51,7 @@ func TestUserRoute_WithUserIdHeader(t *testing.T) {
 	client := &http.Client{
 		Transport: &qchttp3.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: false,
 			},
 		},
 	}

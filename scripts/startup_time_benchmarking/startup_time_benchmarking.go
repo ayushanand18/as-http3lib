@@ -23,7 +23,7 @@ func main() {
 
 	tr := &http3.Transport{
 		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: true,
+			InsecureSkipVerify: false,
 		},
 	}
 	defer tr.Close()

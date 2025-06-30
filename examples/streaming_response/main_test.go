@@ -54,7 +54,7 @@ func TestHTTP3Server_BasicStreamingResponse(t *testing.T) {
 	client := &http.Client{
 		Transport: &qchttp3.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: false,
 			},
 		},
 	}
