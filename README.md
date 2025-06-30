@@ -11,7 +11,9 @@
 2. Self-signed TLS Certificates
 3. All HTTP responses, JSONResponses, Streaming responses
 
-> You can see the pipeline of changes in [/notes/TODO.md](/notes/TODO.md)
+See detailed steps on running in [/notes/HOW-TO-RUN.md](/notes/HOW-TO-RUN.md)
+
+See the pipeline of changes in [/notes/TODO.md](/notes/TODO.md)
 
 ## Installation
 > Import the Go package in your service using

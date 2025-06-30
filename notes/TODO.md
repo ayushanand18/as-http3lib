@@ -16,6 +16,7 @@
     + [x] Implement streaming responses
     + [ ] Implement media responses
 5. Documentation
-    + [ ] compiler using `doxygen`
+    + [ ] a simple sphinx docs
 6. Unit Tests
+    + [x] write simple e2e integration tests (client-server) for all features
     + [ ] write unit tests with apt edge case coverage

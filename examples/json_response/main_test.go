@@ -24,7 +24,7 @@ type DummyResponse struct {
 
 func TestUserRoute_NaiveJSONResponse(t *testing.T) {
 	ctx := context.Background()
-	addr := "localhost:4433"
+	addr := "localhost:443"
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {

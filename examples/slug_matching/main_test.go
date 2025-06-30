@@ -17,7 +17,7 @@ import (
 
 func TestUserRoute_WithUserIdHeader(t *testing.T) {
 	ctx := context.Background()
-	addr := "localhost:4433"
+	addr := "localhost:443"
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {

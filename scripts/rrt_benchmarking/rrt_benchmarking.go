@@ -121,7 +121,7 @@ func calculatePercentile(latencies []time.Duration, percentile float64) time.Dur
 
 func main() {
 	const (
-		targetURL    = "https://localhost:4433/test"
+		targetURL    = "https://localhost:443/test"
 		virtualUsers = 50
 		testDuration = 30 * time.Second
 	)

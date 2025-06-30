@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	const TARGET_URL = "https://localhost:4433/test"
+	const TARGET_URL = "https://localhost:443/test"
 	const MAX_TRIES = 10000
 	// choosing 8ms as context deadline, since p99 < 8ms
 	// we want to only wait until request lifetime
