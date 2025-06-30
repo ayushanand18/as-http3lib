@@ -1,5 +1,5 @@
 # as-http3lib
-An HTTP/3 only server library written in pure Go.
+An HTTP/1.1 + HTTP/2 + HTTP/3 server library written in pure Go.
 
 > Note: The previous version of this lib was written in C++, but 
 > has since been rewritten in Golang
