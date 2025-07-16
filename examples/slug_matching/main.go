@@ -9,6 +9,11 @@ import (
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 )
 
+type MyCustomResponseType struct {
+	UserId  string
+	Message string
+}
+
 func main() {
 	ctx := context.Background()
 
@@ -19,15 +24,14 @@ func main() {
 
 	server.AddServeMethod(ctx, types.ServeOptions{
 		URL: "/users/{user_id}",
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			headers := make(map[string]string)
-			headers["X-User-Id"] = r.PathValue("user_id")
+		Handler: func(ctx context.Context, r *http.Request) (interface{}, error) {
+			// headers := make(map[string]string)
+			// headers["X-User-Id"] = r.PathValue("user_id")
 
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Headers:    headers,
-				Body:       []byte("Hello World from GET."),
-			}
+			return &MyCustomResponseType{
+				UserId:  r.PathValue("user_id"),
+				Message: "Hello World from GET.",
+			}, nil
 		},
 		Method: "GET",
 	})

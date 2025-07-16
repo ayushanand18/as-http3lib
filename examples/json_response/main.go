@@ -26,11 +26,11 @@ func main() {
 	server.AddServeMethod(ctx, types.ServeOptions{
 		URL:          "/json",
 		ResponseType: constants.RESPONSE_TYPE_JSON_RESPONSE,
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
+		Handler: func(ctx context.Context, r *http.Request) (interface{}, error) {
 			return DummyResponse{
 				Key:   "test",
 				Value: 123,
-			}
+			}, nil
 		},
 		Method: "GET",
 	})

@@ -23,7 +23,7 @@ func main() {
 	server.AddServeMethod(ctx, types.ServeOptions{
 		URL:          "/streaming",
 		ResponseType: constants.RESPONSE_TYPE_STREAMING_RESPONSE,
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
+		Handler: func(ctx context.Context, r *http.Request) (interface{}, error) {
 			for i := range 5 {
 				time.Sleep(time.Duration(1) * time.Second)
 
@@ -33,7 +33,7 @@ func main() {
 				}
 			}
 
-			return nil
+			return nil, nil
 		},
 		Method: "GET",
 	})

@@ -19,22 +19,16 @@ func main() {
 
 	server.AddServeMethod(ctx, types.ServeOptions{
 		URL: "/test",
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Body:       []byte("Hello World from GET."),
-			}
+		Handler: func(ctx context.Context, r *http.Request) (interface{}, error) {
+			return "Hello World from GET.", nil
 		},
 		Method: "GET",
 	})
 
 	server.AddServeMethod(ctx, types.ServeOptions{
 		URL: "/test",
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Body:       []byte("Hello World from POST."),
-			}
+		Handler: func(ctx context.Context, r *http.Request) (interface{}, error) {
+			return "Hello World from POST.", nil
 		},
 		Method: "POST",
 	})
