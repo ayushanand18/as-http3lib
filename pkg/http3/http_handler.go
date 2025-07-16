@@ -8,7 +8,10 @@ import (
 )
 
 func httpDefaultHandler(ctx context.Context, w http.ResponseWriter, options types.ServeOptions, handler types.HandlerFunc, r *http.Request) {
-	resp := handler(ctx, r)
+	resp, err := handler(ctx, r)
+	if err != nil {
+		return 
+	}
 
 	response := resp.(*types.HttpResponse)
 	if response.StatusCode == 0 {

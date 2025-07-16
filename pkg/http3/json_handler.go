@@ -10,7 +10,7 @@ import (
 )
 
 func jsonDefaultHandler(ctx context.Context, w http.ResponseWriter, options types.ServeOptions, handler types.HandlerFunc, r *http.Request) {
-	resp := handler(ctx, r)
+	resp, err := handler(ctx, r)
 
 	marshalledBody, err := json.Marshal(resp)
 	if err != nil {

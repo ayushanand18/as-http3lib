@@ -15,4 +15,4 @@ type ServeOptions struct {
 	DefaultHeaders map[string]string
 }
 
-type HandlerFunc func(context.Context, *http.Request) interface{}
+type HandlerFunc func(context.Context, *http.Request) (interface{}, error)
