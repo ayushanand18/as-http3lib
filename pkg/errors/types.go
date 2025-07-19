@@ -1,5 +1,7 @@
 package errors
 
+import "net/http"
+
 type ErrorType uint32
 
 const (
@@ -76,7 +78,7 @@ var errorTypeToMessageMap = map[ErrorType]string{
 	NetworkAuthenticationRequired: "NETWORK_AUTHENTICATION_REQUIRED_ERROR",
 }
 
-var errorTypeToStatusCodeMap = map[ErrorType]uint32{
+var errorTypeToStatusCodeMap = map[ErrorType]int{
 	BadRequest:                  400,
 	Unauthorized:                401,
 	PaymentRequired:             402,
@@ -109,4 +111,13 @@ var errorTypeToStatusCodeMap = map[ErrorType]uint32{
 	LoopDetected:                  508,
 	NotExtended:                   510,
 	NetworkAuthenticationRequired: 511,
+}
+
+func DecodeErrorToHttpErrorStatus(err error) int {
+	errTyped, ok := err.(customError)
+	if !ok {
+		return http.StatusInternalServerError
+	}
+
+	return errTyped.Code()
 }

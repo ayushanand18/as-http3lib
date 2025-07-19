@@ -12,6 +12,7 @@ import (
 	"github.com/ayushanand18/as-http3lib/internal/tls"
 	"github.com/ayushanand18/as-http3lib/internal/utils"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
+	"github.com/gorilla/mux"
 	"github.com/quic-go/quic-go"
 	qchttp3 "github.com/quic-go/quic-go/http3"
 	"github.com/quic-go/quic-go/qlog"
@@ -33,7 +34,7 @@ func (h *rootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type server struct {
 	qchttp3.Server
-	mux           *http.ServeMux
+	mux           *mux.Router
 	routeMatchMap map[string]map[constants.HttpMethodTypes]types.HandlerFunc
 	http1Server   http.Server
 }
@@ -41,7 +42,17 @@ type server struct {
 type Server interface {
 	Initialize(context.Context) error
 	ListenAndServe(context.Context) error
-	AddServeMethod(context.Context, types.ServeOptions) error
+
+	// HTTP Methods
+	GET(string) Method
+	POST(string) Method
+	PUT(string) Method
+	PATCH(string) Method
+	DELETE(string) Method
+	HEAD(string) Method
+	OPTIONS(string) Method
+	CONNECT(string) Method
+	TRACE(string) Method
 }
 
 func NewServer(ctx context.Context) Server {
@@ -61,7 +72,7 @@ func NewServer(ctx context.Context) Server {
 			Addr:    utils.GetHttp1ListeningAddress(ctx),
 			Handler: nil,
 		},
-		mux:           http.NewServeMux(),
+		mux:           mux.NewRouter(),
 		routeMatchMap: make(map[string]map[constants.HttpMethodTypes]types.HandlerFunc),
 	}
 }
@@ -107,43 +118,38 @@ func (s *server) ListenAndServe(ctx context.Context) error {
 	return <-errChan
 }
 
-func (s *server) AddServeMethod(ctx context.Context, options types.ServeOptions) error {
-	if err := utils.ValidateOptionsBeforeRequest(options); err != nil {
-		return err
-	}
+func (s *server) GET(url string) Method {
+	return NewMethod(constants.HTTP_METHOD_GET, url, s)
+}
 
-	if _, ok := s.routeMatchMap[options.URL]; !ok {
-		s.routeMatchMap[options.URL] = make(map[constants.HttpMethodTypes]types.HandlerFunc)
-	}
+func (s *server) POST(url string) Method {
+	return NewMethod(constants.HTTP_METHOD_POST, url, s)
 
-	// if the combination exists, reassign it
-	s.routeMatchMap[options.URL][options.Method] = options.Handler
-	if len(s.routeMatchMap[options.URL]) == 1 {
-		s.mux.HandleFunc(options.URL, func(w http.ResponseWriter, r *http.Request) {
-			requestMethod := constants.HttpMethodTypes(strings.ToUpper(r.Method))
+}
+func (s *server) PUT(url string) Method {
+	return NewMethod(constants.HTTP_METHOD_PUT, url, s)
+}
 
-			methodHandlers, ok := s.routeMatchMap[options.URL]
-			if !ok {
-				http.Error(w, "Not Found", http.StatusNotFound)
-				return
-			}
+func (s *server) PATCH(url string) Method {
+	return NewMethod(constants.HTTP_METHOD_PATCH, url, s)
+}
 
-			handler, ok := methodHandlers[requestMethod]
-			if !ok {
-				http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-				return
-			}
+func (s *server) DELETE(url string) Method {
+	return NewMethod(constants.HTTP_METHOD_DELETE, url, s)
+}
 
-			switch options.ResponseType {
-			case constants.RESPONSE_TYPE_JSON_RESPONSE:
-				jsonDefaultHandler(r.Context(), w, options, handler, r)
-			case constants.RESPONSE_TYPE_STREAMING_RESPONSE:
-				streamingDefaultHandler(r.Context(), w, options, handler, r)
-			default:
-				httpDefaultHandler(r.Context(), w, options, handler, r)
-			}
-		})
-	}
+func (s *server) HEAD(url string) Method {
+	return NewMethod(constants.HTTP_METHOD_HEAD, url, s)
+}
 
-	return nil
+func (s *server) OPTIONS(url string) Method {
+	return NewMethod(constants.HTTP_METHOD_OPTIONS, url, s)
+}
+
+func (s *server) CONNECT(url string) Method {
+	return NewMethod(constants.HTTP_METHOD_CONNECT, url, s)
+}
+
+func (s *server) TRACE(url string) Method {
+	return NewMethod(constants.HTTP_METHOD_TRACE, url, s)
 }

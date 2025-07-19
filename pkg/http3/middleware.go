@@ -3,6 +3,8 @@ package http3
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type responseRecorder struct {
@@ -31,5 +33,5 @@ func (r *responseRecorder) Flush() {
 }
 
 type rootHandler struct {
-	mux *http.ServeMux
+	mux *mux.Router
 }

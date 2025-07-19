@@ -1,6 +1,10 @@
 package errors
 
-import "github.com/pkg/errors"
+import (
+	"net/http"
+
+	"github.com/pkg/errors"
+)
 
 type customError struct {
 	errorType     ErrorType
@@ -13,8 +17,13 @@ func (err customError) Message() string {
 	return err.errorMessage
 }
 
-func (err customError) Code() uint32 {
-	return errorTypeToStatusCodeMap[err.errorType]
+func (err customError) Code() int {
+	code, ok := errorTypeToStatusCodeMap[err.errorType]
+	if !ok {
+		return http.StatusInternalServerError
+	}
+
+	return code
 }
 
 func (err customError) String() string {
