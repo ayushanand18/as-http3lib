@@ -7,6 +7,7 @@
 + [x] requests params handling
 + [x] simple JSON responses
 + [x] streaming responses (LLM/media streaming use cases)
++ [x] custom encoders/decoder
 + [ ] media/file responses
 + [ ] generic middlewares server-wide
 + [ ] endpoint specific middlewares
