@@ -16,35 +16,35 @@ import (
 	qchttp3 "github.com/quic-go/quic-go/http3"
 )
 
+func HelloWorldStreaming(ctx context.Context, request interface{}) (response interface{}, err error) {
+	for i := range 5 {
+		time.Sleep(time.Duration(1) * time.Second)
+
+		channel := ctx.Value(constants.STREAMING_RESPONSE_CHANNEL_CONTEXT_KEY).(chan types.StreamChunk)
+		channel <- types.StreamChunk{
+			Id:   uint32(i),
+			Data: []byte(fmt.Sprintf("Chunk: %d \n\n", i)),
+		}
+	}
+
+	return nil, nil
+}
+
 func TestHTTP3Server_BasicStreamingResponse(t *testing.T) {
 	ctx := context.Background()
-	addr := "localhost:4434"
+	addr := "localhost:4431"
 
 	s := http3.NewServer(ctx)
 	if err := s.Initialize(ctx); err != nil {
 		t.Fatalf("server initialization failed: %v", err)
 	}
 
-	err := s.AddServeMethod(ctx, types.ServeOptions{
-		URL:          "/streaming",
-		ResponseType: constants.RESPONSE_TYPE_STREAMING_RESPONSE,
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			for i := range 5 {
-				time.Sleep(time.Duration(1) * time.Second)
-
-				ctx.Value(constants.STREAMING_RESPONSE_CHANNEL_CONTEXT_KEY).(chan types.StreamChunk) <- types.StreamChunk{
-					Id:   uint32(i),
-					Data: []byte(fmt.Sprintf("Chunk: %d \n", i)),
-				}
-			}
-
-			return nil
+	s.GET("/streaming").Serve(types.ServeOptions{
+		Handler: HelloWorldStreaming,
+		Options: types.MethodOptions{
+			IsStreamingResponse: true,
 		},
-		Method: "GET",
 	})
-	if err != nil {
-		t.Fatalf("failed to add serve method: %v", err)
-	}
 
 	go func() {
 		_ = s.ListenAndServe(ctx)
@@ -74,7 +74,7 @@ func TestHTTP3Server_BasicStreamingResponse(t *testing.T) {
 		t.Fatalf("failed to read response body: %v", err)
 	}
 
-	expected := "Chunk: 0 \nChunk: 1 \nChunk: 2 \nChunk: 3 \nChunk: 4 \n"
+	expected := "Chunk: 0 \n\nChunk: 1 \n\nChunk: 2 \n\nChunk: 3 \n\nChunk: 4 \n\n"
 	if strings.ReplaceAll(string(body), "\r", "") != expected {
 		t.Fatalf("expected streaming body:\n%q\ngot:\n%q", expected, string(body))
 	}

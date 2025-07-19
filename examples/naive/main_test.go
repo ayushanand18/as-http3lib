@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/pkg/http3"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 	qchttp3 "github.com/quic-go/quic-go/http3"
@@ -17,31 +16,18 @@ import (
 
 func TestUserRoute_NaiveGETRequest(t *testing.T) {
 	ctx := context.Background()
-	addr := "localhost"
+	addr := "localhost:4431"
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 
-	err := server.AddServeMethod(ctx, types.ServeOptions{
-		URL:          "/test",
-		Method:       constants.HTTP_METHOD_GET,
-		ResponseType: constants.RESPONSE_TYPE_BASE_RESPONSE,
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			headers := map[string]string{
-				"X-User-Id": r.PathValue("user_id"),
-			}
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Headers:    headers,
-				Body:       []byte("Hello World from GET."),
-			}
+	server.GET("/test").Serve(types.ServeOptions{
+		Handler: func(ctx context.Context, request interface{}) (interface{}, error) {
+			return "Hello World from GET.", nil
 		},
 	})
-	if err != nil {
-		t.Fatalf("AddServeMethod failed: %v", err)
-	}
 
 	go func() {
 		_ = server.ListenAndServe(ctx)
@@ -70,7 +56,7 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read body: %v", err)
 	}
-	if string(body) != "Hello World from GET." {
+	if string(body) != "\"Hello World from GET.\"" {
 		t.Errorf("Expected body 'Hello World from GET.', got %q", body)
 	}
 
@@ -78,27 +64,18 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 
 func TestUserRoute_NaivePOSTRequest(t *testing.T) {
 	ctx := context.Background()
-	addr := "localhost"
+	addr := "localhost:4431"
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 
-	err := server.AddServeMethod(ctx, types.ServeOptions{
-		URL:          "/test",
-		Method:       constants.HTTP_METHOD_GET,
-		ResponseType: constants.RESPONSE_TYPE_BASE_RESPONSE,
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Body:       []byte("Hello World from POST."),
-			}
+	server.POST("/test").Serve(types.ServeOptions{
+		Handler: func(ctx context.Context, request interface{}) (interface{}, error) {
+			return "Hello World from POST.", nil
 		},
 	})
-	if err != nil {
-		t.Fatalf("AddServeMethod failed: %v", err)
-	}
 
 	go func() {
 		_ = server.ListenAndServe(ctx)

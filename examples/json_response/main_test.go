@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/pkg/http3"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 
@@ -24,27 +23,21 @@ type DummyResponse struct {
 
 func TestUserRoute_NaiveJSONResponse(t *testing.T) {
 	ctx := context.Background()
-	addr := "localhost:443"
+	addr := "localhost:4431"
 
 	server := http3.NewServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 
-	err := server.AddServeMethod(ctx, types.ServeOptions{
-		URL:          "/json",
-		Method:       constants.HTTP_METHOD_GET,
-		ResponseType: constants.RESPONSE_TYPE_JSON_RESPONSE,
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
+	server.GET("/json").Serve(types.ServeOptions{
+		Handler: func(ctx context.Context, req interface{}) (interface{}, error) {
 			return DummyResponse{
 				Key:   "test",
 				Value: 123,
-			}
+			}, nil
 		},
 	})
-	if err != nil {
-		t.Fatalf("AddServeMethod failed: %v", err)
-	}
 
 	go func() {
 		_ = server.ListenAndServe(ctx)

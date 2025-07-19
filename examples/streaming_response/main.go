@@ -4,13 +4,26 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/pkg/http3"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 )
+
+func HelloWorldStreaming(ctx context.Context, request interface{}) (response interface{}, err error) {
+	for i := range 5 {
+		time.Sleep(time.Duration(1) * time.Second)
+
+		channel := ctx.Value(constants.STREAMING_RESPONSE_CHANNEL_CONTEXT_KEY).(chan types.StreamChunk)
+		channel <- types.StreamChunk{
+			Id:   uint32(i),
+			Data: []byte(fmt.Sprintf("Chunk: %d \n\n", i)),
+		}
+	}
+
+	return nil, nil
+}
 
 func main() {
 	ctx := context.Background()
@@ -20,22 +33,11 @@ func main() {
 		log.Fatalf("Server failed to Initialize: %v", err)
 	}
 
-	server.AddServeMethod(ctx, types.ServeOptions{
-		URL:          "/streaming",
-		ResponseType: constants.RESPONSE_TYPE_STREAMING_RESPONSE,
-		Handler: func(ctx context.Context, r *http.Request) (interface{}, error) {
-			for i := range 5 {
-				time.Sleep(time.Duration(1) * time.Second)
-
-				ctx.Value(constants.STREAMING_RESPONSE_CHANNEL_CONTEXT_KEY).(chan types.StreamChunk) <- types.StreamChunk{
-					Id:   uint32(i),
-					Data: []byte(fmt.Sprintf("Chunk: %d \n\n", i)),
-				}
-			}
-
-			return nil, nil
+	server.GET("/streaming").Serve(types.ServeOptions{
+		Handler: HelloWorldStreaming,
+		Options: types.MethodOptions{
+			IsStreamingResponse: true,
 		},
-		Method: "GET",
 	})
 
 	if err := server.ListenAndServe(ctx); err != nil {
