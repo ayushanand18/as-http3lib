@@ -3,11 +3,25 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 
+	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/pkg/http3"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 )
+
+type MyCustomResponseType struct {
+	UserId  string
+	Message string
+}
+
+func UserIdHandler(ctx context.Context, request interface{}) (response interface{}, err error) {
+	pathValues := ctx.Value(constants.HTTP_REQUEST_PATH_VALUES).(map[string]string)
+
+	return &MyCustomResponseType{
+		UserId:  pathValues["user_id"],
+		Message: "Hello World from GET.",
+	}, nil
+}
 
 func main() {
 	ctx := context.Background()
@@ -17,19 +31,8 @@ func main() {
 		log.Fatalf("Server failed to Initialize: %v", err)
 	}
 
-	server.AddServeMethod(ctx, types.ServeOptions{
-		URL: "/users/{user_id}",
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			headers := make(map[string]string)
-			headers["X-User-Id"] = r.PathValue("user_id")
-
-			return &types.HttpResponse{
-				StatusCode: 200,
-				Headers:    headers,
-				Body:       []byte("Hello World from GET."),
-			}
-		},
-		Method: "GET",
+	server.GET("/users/{user_id}").Serve(types.ServeOptions{
+		Handler: UserIdHandler,
 	})
 
 	if err := server.ListenAndServe(ctx); err != nil {

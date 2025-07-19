@@ -26,4 +26,7 @@ type ContextKeys string
 
 const (
 	STREAMING_RESPONSE_CHANNEL_CONTEXT_KEY ContextKeys = "response_channel"
+	HTTP_REQUEST_HEADERS                   ContextKeys = "request_headers"
+	HTTP_REQUEST_URL_PARAMS                ContextKeys = "request_url_params"
+	HTTP_REQUEST_PATH_VALUES               ContextKeys = "request_path_values"
 )

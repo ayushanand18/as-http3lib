@@ -4,30 +4,90 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/ayushanand18/as-http3lib/internal/constants"
+	ashttp "github.com/ayushanand18/as-http3lib/internal/http"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
+	"github.com/gorilla/mux"
 )
 
-func httpDefaultHandler(ctx context.Context, w http.ResponseWriter, options types.ServeOptions, handler types.HandlerFunc, r *http.Request) {
-	resp := handler(ctx, r)
+func httpDefaultHandler(
+	ctx context.Context,
+	w http.ResponseWriter,
+	handler types.HandlerFunc,
+	decoder types.HttpDecoder,
+	encoder types.HttpEncoder,
+	r *http.Request) {
 
-	response := resp.(*types.HttpResponse)
-	if response.StatusCode == 0 {
-		response.StatusCode = http.StatusOK
+	var request interface{}
+	var err error
+
+	ctx, err = defaultMiddleware(ctx, r)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
-	w.WriteHeader(response.StatusCode)
 
-	for key, value := range options.DefaultHeaders {
-		w.Header().Set(key, value)
+	if decoder != nil {
+		request, err = decoder(ctx, r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	} else {
+		request, err = ashttp.DefaultHttpDecode(ctx, r)
 	}
 
-	for key, value := range response.Headers {
-		w.Header().Set(key, value)
+	resp, err := handler(ctx, request)
+	if err != nil {
+		return
 	}
 
-	if response.Body != nil {
-		_, err := w.Write(response.Body)
+	headers := make(map[string][]string)
+	var body []byte
+	if encoder != nil {
+		headers, body, err = encoder(ctx, resp)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	} else {
+		headers, body, err = ashttp.DefaultHttpEncode(ctx, resp)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
+
+	headers = ashttp.PopulateDefaultServerHeaders(ctx, headers)
+
+	for key, value := range headers {
+		w.Header().Del(key)
+		for _, v := range value {
+			w.Header().Add(key, v)
+		}
+	}
+
+	if body != nil {
+		_, err := w.Write(body)
 		if err != nil {
 			panic(err)
 		}
 	}
+}
+
+func defaultMiddleware(ctx context.Context, r *http.Request) (outgoingContext context.Context, err error) {
+	ctx = context.WithValue(ctx, constants.HTTP_REQUEST_HEADERS, r.Header)
+
+	params := make(map[string]string)
+	for key, values := range r.URL.Query() {
+		if len(values) > 0 {
+			params[key] = values[0]
+		}
+	}
+
+	ctx = context.WithValue(ctx, constants.HTTP_REQUEST_URL_PARAMS, params)
+
+	ctx = context.WithValue(ctx, constants.HTTP_REQUEST_PATH_VALUES, mux.Vars(r))
+
+	return ctx, nil
 }

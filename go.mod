@@ -3,6 +3,8 @@ module github.com/ayushanand18/as-http3lib
 go 1.24.4
 
 require (
+	github.com/gorilla/mux v1.8.1
+	github.com/pkg/errors v0.8.1
 	github.com/quic-go/quic-go v0.52.0
 	gopkg.in/yaml.v3 v3.0.1
 )

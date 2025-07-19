@@ -3,9 +3,7 @@ package main
 import (
 	"context"
 	"log"
-	"net/http"
 
-	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/pkg/http3"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 )
@@ -13,6 +11,13 @@ import (
 type DummyResponse struct {
 	Key   string `json:"key"`
 	Value uint32 `json:"value"`
+}
+
+func HelloWorldGet(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return DummyResponse{
+		Key:   "test",
+		Value: 123,
+	}, nil
 }
 
 func main() {
@@ -23,16 +28,8 @@ func main() {
 		log.Fatalf("Server failed to Initialize: %v", err)
 	}
 
-	server.AddServeMethod(ctx, types.ServeOptions{
-		URL:          "/json",
-		ResponseType: constants.RESPONSE_TYPE_JSON_RESPONSE,
-		Handler: func(ctx context.Context, r *http.Request) interface{} {
-			return DummyResponse{
-				Key:   "test",
-				Value: 123,
-			}
-		},
-		Method: "GET",
+	server.GET("/json").Serve(types.ServeOptions{
+		Handler: HelloWorldGet,
 	})
 
 	if err := server.ListenAndServe(ctx); err != nil {
