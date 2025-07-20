@@ -102,6 +102,7 @@ func (s *server) Initialize(ctx context.Context) error {
 }
 
 func (s *server) ListenAndServe(ctx context.Context) error {
+	utils.PrintStartBanner()
 	errChan := make(chan error, 2)
 
 	go func() {

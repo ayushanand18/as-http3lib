@@ -1,3 +1,10 @@
+ █████╗ ███████╗██╗  ██╗██████╗ 
+██╔══██╗██╔════╝██║  ██║╚════██╗
+███████║███████╗███████║ █████╔╝
+██╔══██║╚════██║██╔══██║ ╚═══██╗
+██║  ██║███████║██║  ██║██████╔╝
+╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═════╝ 
+                                
 # as-http3lib
 
 [![Go Tests](https://github.com/ayushanand18/as-http3lib/actions/workflows/test-examples.yml/badge.svg)](https://github.com/ayushanand18/as-http3lib/actions/workflows/test-examples.yml)
