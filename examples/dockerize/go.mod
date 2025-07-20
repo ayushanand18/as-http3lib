@@ -2,6 +2,7 @@ module main
 
 go 1.23
 
+require github.com/ayushanand18/as-http3lib v1.1.0
 
 require (
 	github.com/francoispqt/gojay v1.2.13 // indirect
