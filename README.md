@@ -1,4 +1,4 @@
-![alt text](/assets/logo-startup.png)
+![as-http3lib](/assets/logo-startup.png)
 
 # as-http3lib
 
