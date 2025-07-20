@@ -5,5 +5,6 @@ services:
     build: .
     container_name: as-http3lib-server
     ports:
+      - "4431:4431/tcp"
       - "4431:4431/udp"
     restart: unless-stopped

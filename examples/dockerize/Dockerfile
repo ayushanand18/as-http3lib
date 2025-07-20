@@ -8,12 +8,11 @@ RUN apk add --no-cache openssl
 COPY go.mod go.sum ./
 RUN go mod download
 
-
 COPY . .
 
-RUN chmod +x setup.sh && ./setup.sh
+RUN sh setup.sh
 
-RUN CGO_ENABLED=0 go build -o server ./main.go
+RUN CGO_ENABLED=0 go build -o server main.go
 
 FROM alpine:latest
 
@@ -23,6 +22,8 @@ COPY --from=builder /app/cert.pem .
 COPY --from=builder /app/key.pem .
 COPY --from=builder /app/config.yaml .
 
-EXPOSE 4431/udp
+RUN sysctl -w net.core.rmem_max=7500000 && sysctl -w net.core.wmem_max=7500000 || true
 
-ENTRYPOINT ["./server"]
+EXPOSE 4431
+
+ENTRYPOINT ["/bin/sh", "-c", "./server & tail -f /dev/null"]

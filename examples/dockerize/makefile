@@ -4,7 +4,7 @@ build:
 	docker-compose build
 
 run:
-	docker-compose up --build
+	docker-compose up --build -d --force-recreate
 
 up:
 	docker-compose up
