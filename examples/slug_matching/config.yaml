@@ -1,12 +1,15 @@
 service:
   address:
-    ip: 127.0.0.1
-    port: 4433
+    ip: ""
+    port: 4431
   tls:
     generate_if_missing: true
     certificate:
       raw: ""
-      path: ../cert.pem
+      path: cert.pem
     key:
       raw: ""
-      path: ../key.pem
+      path: key.pem
+  http1_address:
+    ip: ""
+    port: 4431

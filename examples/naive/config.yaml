@@ -1,7 +1,7 @@
 service:
   address:
     ip: ""
-    port: 443
+    port: 4431
   tls:
     generate_if_missing: true
     certificate:
@@ -12,4 +12,4 @@ service:
       path: key.pem
   http1_address:
     ip: ""
-    port: 443
+    port: 4431
