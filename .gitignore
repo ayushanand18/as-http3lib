@@ -30,3 +30,8 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# certificate files
+cert.pem
+key.pem
+localhost.csr

@@ -1,0 +1,9 @@
+version: "3.9"
+
+services:
+  as-http3lib-server:
+    build: .
+    container_name: as-http3lib-server
+    ports:
+      - "4431:4431/udp"
+    restart: unless-stopped
