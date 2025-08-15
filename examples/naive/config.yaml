@@ -12,4 +12,7 @@ service:
       path: key.pem
   http1_address:
     ip: ""
+    port: 4430
+  http1_address_tls:
+    ip: ""
     port: 4431
