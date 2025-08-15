@@ -35,3 +35,6 @@ go.work.sum
 cert.pem
 key.pem
 localhost.csr
+
+# private local files
+.private/

@@ -17,7 +17,6 @@
 + [ ] out of the box rate limiting support (options in middleware)
 + [ ] monitoring (prometheous/otel standard API)
 
-
 ### Documentation
 + [ ] design document
 + [ ] tooling/better examples in readme
