@@ -34,9 +34,10 @@ func (h *rootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type server struct {
 	qchttp3.Server
-	mux           *mux.Router
-	routeMatchMap map[string]map[constants.HttpMethodTypes]types.HandlerFunc
-	http1Server   http.Server
+	mux            *mux.Router
+	routeMatchMap  map[string]map[constants.HttpMethodTypes]types.HandlerFunc
+	http1ServerTLS http.Server
+	http1Server    http.Server
 }
 
 type Server interface {
@@ -69,8 +70,10 @@ func NewServer(ctx context.Context) Server {
 			QUICConfig:      quicConfig,
 		},
 		http1Server: http.Server{
-			Addr:    utils.GetHttp1ListeningAddress(ctx),
-			Handler: nil,
+			Addr: utils.GetHttp1ListeningAddress(ctx),
+		},
+		http1ServerTLS: http.Server{
+			Addr: utils.GetHttp1TLSListeningAddress(ctx),
 		},
 		mux:           mux.NewRouter(),
 		routeMatchMap: make(map[string]map[constants.HttpMethodTypes]types.HandlerFunc),
@@ -91,12 +94,14 @@ func (s *server) Initialize(ctx context.Context) error {
 	s.TLSConfig = tlsConfig
 	s.TLSConfig.NextProtos = []string{"h3"}
 
-	s.http1Server.Handler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	h1Handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// if on H/1 advertise H/3
 		w.Header().Set("Alt-Svc", fmt.Sprintf(`h3=":%s"; ma=2592000,h3-29=":%s"; ma=2592000`, s.Addr[strings.LastIndex(s.Addr, ":")+1:], s.Addr[strings.LastIndex(s.Addr, ":")+1:]))
 		root.ServeHTTP(w, r)
 	})
-	s.http1Server.TLSConfig = tlsConfig
+	s.http1Server.Handler = h1Handler
+	s.http1ServerTLS.Handler = h1Handler
+	s.http1ServerTLS.TLSConfig = tlsConfig
 
 	return nil
 }
@@ -112,8 +117,14 @@ func (s *server) ListenAndServe(ctx context.Context) error {
 
 	go func() {
 		log.Println("Starting HTTP/1.1 + Alt-Svc server on", s.http1Server.Addr)
+		// server over http
+		errChan <- s.http1Server.ListenAndServe()
+	}()
 
-		errChan <- s.http1Server.ListenAndServeTLS("", "")
+	go func() {
+		log.Println("Starting HTTP/1.1 + Alt-Svc server (HTTPS) on", s.http1ServerTLS.Addr)
+		// server over https
+		errChan <- s.http1ServerTLS.ListenAndServeTLS("", "")
 	}()
 
 	return <-errChan
