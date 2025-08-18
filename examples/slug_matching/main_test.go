@@ -35,7 +35,7 @@ func Encoder(ctx context.Context, response interface{}) (headers map[string][]st
 }
 
 func UserIdHandler(ctx context.Context, request interface{}) (response interface{}, err error) {
-	pathValues := ctx.Value(constants.HTTP_REQUEST_PATH_VALUES).(map[string]string)
+	pathValues := ctx.Value(constants.HttpRequestPathValues).(map[string]string)
 
 	return MyCustomResponseType{
 		UserId:  pathValues["user_id"],

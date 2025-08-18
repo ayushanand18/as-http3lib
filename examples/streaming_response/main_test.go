@@ -20,7 +20,7 @@ func HelloWorldStreaming(ctx context.Context, request interface{}) (response int
 	for i := range 5 {
 		time.Sleep(time.Duration(1) * time.Second)
 
-		channel := ctx.Value(constants.STREAMING_RESPONSE_CHANNEL_CONTEXT_KEY).(chan types.StreamChunk)
+		channel := ctx.Value(constants.StreamingResponseChannelContextKey).(chan types.StreamChunk)
 		channel <- types.StreamChunk{
 			Id:   uint32(i),
 			Data: []byte(fmt.Sprintf("Chunk: %d \n\n", i)),

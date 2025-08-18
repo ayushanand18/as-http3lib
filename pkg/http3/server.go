@@ -131,37 +131,37 @@ func (s *server) ListenAndServe(ctx context.Context) error {
 }
 
 func (s *server) GET(url string) Method {
-	return NewMethod(constants.HTTP_METHOD_GET, url, s)
+	return NewMethod(constants.HttpMethodGet, url, s)
 }
 
 func (s *server) POST(url string) Method {
-	return NewMethod(constants.HTTP_METHOD_POST, url, s)
+	return NewMethod(constants.HttpMethodPost, url, s)
 
 }
 func (s *server) PUT(url string) Method {
-	return NewMethod(constants.HTTP_METHOD_PUT, url, s)
+	return NewMethod(constants.HttpMethodPut, url, s)
 }
 
 func (s *server) PATCH(url string) Method {
-	return NewMethod(constants.HTTP_METHOD_PATCH, url, s)
+	return NewMethod(constants.HttpMethodPatch, url, s)
 }
 
 func (s *server) DELETE(url string) Method {
-	return NewMethod(constants.HTTP_METHOD_DELETE, url, s)
+	return NewMethod(constants.HttpMethodDelete, url, s)
 }
 
 func (s *server) HEAD(url string) Method {
-	return NewMethod(constants.HTTP_METHOD_HEAD, url, s)
+	return NewMethod(constants.HttpMethodHead, url, s)
 }
 
 func (s *server) OPTIONS(url string) Method {
-	return NewMethod(constants.HTTP_METHOD_OPTIONS, url, s)
+	return NewMethod(constants.HttpMethodOptions, url, s)
 }
 
 func (s *server) CONNECT(url string) Method {
-	return NewMethod(constants.HTTP_METHOD_CONNECT, url, s)
+	return NewMethod(constants.HttpMethodConnect, url, s)
 }
 
 func (s *server) TRACE(url string) Method {
-	return NewMethod(constants.HTTP_METHOD_TRACE, url, s)
+	return NewMethod(constants.HttpMethodTrace, url, s)
 }
