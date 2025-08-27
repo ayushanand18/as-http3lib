@@ -54,7 +54,7 @@ func streamingDefaultHandler(
 	}()
 
 	for chunk := range ch {
-		headers := make(map[string][]string)
+		var headers map[string][]string
 		var encoded []byte
 		var err error
 

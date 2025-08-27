@@ -6,12 +6,12 @@ import (
 )
 
 type ServeOptions struct {
-	Handler            HandlerFunc
-	Decoder            HttpDecoder
-	Encoder            HttpEncoder
-	RequestMiddleware  HttpRequestMiddleware
-	ResponseMiddleware HttpResponseMiddleware
-	Options            MethodOptions
+	Handler     HandlerFunc
+	Decoder     HttpDecoder
+	Encoder     HttpEncoder
+	BeforeServe HttpRequestMiddleware
+	AfterServer HttpResponseMiddleware
+	Options     MethodOptions
 }
 
 type MethodOptions struct {

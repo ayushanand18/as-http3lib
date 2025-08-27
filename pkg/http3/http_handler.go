@@ -46,7 +46,7 @@ func httpDefaultHandler(
 		return
 	}
 
-	headers := make(map[string][]string)
+	var headers map[string][]string
 	var body []byte
 	if encoder != nil {
 		headers, body, err = encoder(ctx, resp)

@@ -56,8 +56,8 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read body: %v", err)
 	}
-	if string(body) != "\"Hello World from GET.\"" {
-		t.Errorf("Expected body 'Hello World from GET.', got %q", body)
+	if string(body) != "Hello World from GET." {
+		t.Errorf("Expected body \"Hello World from GET.\" got %q", body)
 	}
 
 }
