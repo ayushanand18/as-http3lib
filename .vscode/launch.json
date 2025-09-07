@@ -27,6 +27,14 @@
             "port": 2345,
             "host": "127.0.0.1",
             "trace": "log" 
-        }
+        },
+        {
+            "name": "Run Example: Slug Matching",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/examples/slug_matching/",
+            "asRoot": true,
+        },
     ]
 }

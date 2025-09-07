@@ -1,6 +1,7 @@
 package http3
 
 import (
+	"encoding/json"
 	"net/http"
 	"strings"
 
@@ -60,4 +61,15 @@ func (m *method) Serve(options types.ServeOptions) {
 			}
 		})
 	}
+}
+
+func DecodeJsonRequest[T any](in interface{}) (T, error) {
+	var out T
+	raw, err := json.Marshal(in)
+	if err != nil {
+		return out, err
+	}
+
+	err = json.Unmarshal(raw, &out)
+	return out, err
 }

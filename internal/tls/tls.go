@@ -8,7 +8,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"log"
+	"log/slog"
 	"math/big"
 	"os"
 	"time"
@@ -91,7 +91,7 @@ func GenerateTLSConfig(ctx context.Context) *tls.Config {
 
 	cert, err := tls.X509KeyPair(certBytesRaw, keyBytesRaw)
 	if err != nil {
-		log.Fatalf("failed to load TLS key pair: %v", err)
+		slog.ErrorContext(ctx, "failed to load TLS key pair", "error", err)
 	}
 	return &tls.Config{
 		Certificates: []tls.Certificate{cert},

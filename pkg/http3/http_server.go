@@ -3,7 +3,7 @@ package http3
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -23,13 +23,13 @@ func (s *server) Initialize(ctx context.Context) error {
 	tlsConfig := tls.GenerateTLSConfig(ctx)
 	root := &rootHandler{mux: s.mux}
 
-	s.Handler = root
-	s.TLSConfig = tlsConfig
-	s.TLSConfig.NextProtos = []string{"h3"}
+	s.h3server.Handler = root
+	s.h3server.TLSConfig = tlsConfig
+	s.h3server.TLSConfig.NextProtos = []string{"h3"}
 
 	h1Handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// if on H/1 advertise H/3
-		w.Header().Set("Alt-Svc", fmt.Sprintf(`h3=":%s"; ma=2592000,h3-29=":%s"; ma=2592000`, s.Addr[strings.LastIndex(s.Addr, ":")+1:], s.Addr[strings.LastIndex(s.Addr, ":")+1:]))
+		w.Header().Set("Alt-Svc", fmt.Sprintf(`h3=":%s"; ma=2592000,h3-29=":%s"; ma=2592000`, s.h3server.Addr[strings.LastIndex(s.h3server.Addr, ":")+1:], s.h3server.Addr[strings.LastIndex(s.h3server.Addr, ":")+1:]))
 		root.ServeHTTP(w, r)
 	})
 	s.http1Server.Handler = h1Handler
@@ -41,22 +41,22 @@ func (s *server) Initialize(ctx context.Context) error {
 
 func (s *server) ListenAndServe(ctx context.Context) error {
 	utils.PrintStartBanner()
-	errChan := make(chan error, 2)
+	errChan := make(chan error, 3)
 
 	go func() {
 		// server over http/3
-		log.Println("Starting HTTP/3 server on", s.Server.Addr)
-		errChan <- s.Server.ListenAndServe()
+		slog.InfoContext(ctx, "Starting HTTP/3 server", "port", s.h3server.Addr)
+		errChan <- s.h3server.ListenAndServe()
 	}()
 
 	go func() {
-		log.Println("Starting HTTP/1.1 + Alt-Svc server on", s.http1Server.Addr)
+		slog.InfoContext(ctx, "Starting HTTP/1.1 + Alt-Svc server", "port", s.http1Server.Addr)
 		// server over http
 		errChan <- s.http1Server.ListenAndServe()
 	}()
 
 	go func() {
-		log.Println("Starting HTTP/1.1 + Alt-Svc server (HTTPS) on", s.http1ServerTLS.Addr)
+		slog.InfoContext(ctx, "Starting HTTP/1.1 + Alt-Svc server (HTTPS)", "port", s.http1ServerTLS.Addr)
 		// server over https
 		errChan <- s.http1ServerTLS.ListenAndServeTLS("", "")
 	}()

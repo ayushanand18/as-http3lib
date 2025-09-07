@@ -29,13 +29,14 @@ func (h *rootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 type server struct {
 	// hTTP server assets
-	qchttp3.Server
+	h3server       qchttp3.Server
 	mux            *mux.Router
 	routeMatchMap  map[string]map[constants.HttpMethodTypes]types.HandlerFunc
 	http1ServerTLS http.Server
 	http1Server    http.Server
 
 	// MCP server assets
+	mcpServer          http.Server
 	mcpToolsHandlerMap map[string]types.HandlerFunc
 }
 
@@ -68,7 +69,7 @@ func NewServer(ctx context.Context) Server {
 		EnableDatagrams: true,
 	}
 	return &server{
-		Server: qchttp3.Server{
+		h3server: qchttp3.Server{
 			Addr:            utils.GetListeningAddress(ctx),
 			Handler:         nil,
 			EnableDatagrams: true,
@@ -79,6 +80,9 @@ func NewServer(ctx context.Context) Server {
 		},
 		http1ServerTLS: http.Server{
 			Addr: utils.GetHttp1TLSListeningAddress(ctx),
+		},
+		mcpServer: http.Server{
+			Addr: utils.GetMcpListeningAddress(ctx),
 		},
 		mux:           mux.NewRouter(),
 		routeMatchMap: make(map[string]map[constants.HttpMethodTypes]types.HandlerFunc),
