@@ -36,6 +36,7 @@ func (s *server) Initialize(ctx context.Context) error {
 	s.http1ServerTLS.Handler = h1Handler
 	s.http1ServerTLS.TLSConfig = tlsConfig
 
+	s.mcpServer.Handler = h1Handler
 	return nil
 }
 

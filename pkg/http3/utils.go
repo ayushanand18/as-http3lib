@@ -2,6 +2,7 @@ package http3
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 
 	"github.com/ayushanand18/as-http3lib/internal/config"
@@ -38,4 +39,15 @@ func injectConstantHeaders() map[string]string {
 	defaultHeaders["X-Server"] = "ashttp3lib"
 
 	return defaultHeaders
+}
+
+func CastParams(in interface{}, out interface{}) (interface{}, error) {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(b, out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ayushanand18/as-http3lib/internal/constants"
+	"github.com/ayushanand18/as-http3lib/internal/mcp"
 	"github.com/ayushanand18/as-http3lib/internal/utils"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 	"github.com/gorilla/mux"
@@ -36,8 +37,11 @@ type server struct {
 	http1Server    http.Server
 
 	// MCP server assets
-	mcpServer          http.Server
-	mcpToolsHandlerMap map[string]types.HandlerFunc
+	mcpServer             http.Server
+	mcpMethodToHandlerMap map[mcp.McpMethodTypes]mcp.McpHandlerFunc
+	mcpTools              map[string]mcp.McpTool
+	mcpResources          map[string]mcp.McpResource
+	mcpPrompts            map[string]mcp.McpPrompt
 }
 
 type Server interface {

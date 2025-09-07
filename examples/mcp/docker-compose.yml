@@ -1,10 +1,12 @@
-version: "1.0"
+version: "2.0"
 
 services:
   as-http3lib-server:
     build: .
     container_name: as-http3lib-server
     ports:
+      - "4432:4432/tcp"
+      - "4430:4430/tcp"
       - "4431:4431/tcp"
       - "4431:4431/udp"
     restart: unless-stopped

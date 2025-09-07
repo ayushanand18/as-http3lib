@@ -36,5 +36,13 @@
             "program": "${workspaceFolder}/examples/slug_matching/",
             "asRoot": true,
         },
+        {
+            "name": "Run MCP Server",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/examples/mcp/",
+            "asRoot": true,
+        },
     ]
 }
