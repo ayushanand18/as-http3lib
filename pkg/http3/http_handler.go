@@ -35,6 +35,10 @@ func httpDefaultHandler(
 		}
 	} else {
 		request, err = ashttp.DefaultHttpDecode(ctx, r)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	resp, err := handler(ctx, request)
@@ -42,7 +46,7 @@ func httpDefaultHandler(
 		return
 	}
 
-	headers := make(map[string][]string)
+	var headers map[string][]string
 	var body []byte
 	if encoder != nil {
 		headers, body, err = encoder(ctx, resp)
@@ -76,7 +80,7 @@ func httpDefaultHandler(
 }
 
 func defaultMiddleware(ctx context.Context, r *http.Request) (outgoingContext context.Context, err error) {
-	ctx = context.WithValue(ctx, constants.HTTP_REQUEST_HEADERS, r.Header)
+	ctx = context.WithValue(ctx, constants.HttpRequestHeaders, r.Header)
 
 	params := make(map[string]string)
 	for key, values := range r.URL.Query() {
@@ -85,9 +89,9 @@ func defaultMiddleware(ctx context.Context, r *http.Request) (outgoingContext co
 		}
 	}
 
-	ctx = context.WithValue(ctx, constants.HTTP_REQUEST_URL_PARAMS, params)
+	ctx = context.WithValue(ctx, constants.HttpRequestURLParams, params)
 
-	ctx = context.WithValue(ctx, constants.HTTP_REQUEST_PATH_VALUES, mux.Vars(r))
+	ctx = context.WithValue(ctx, constants.HttpRequestPathValues, mux.Vars(r))
 
 	return ctx, nil
 }

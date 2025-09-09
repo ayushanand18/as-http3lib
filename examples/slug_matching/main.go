@@ -3,23 +3,36 @@ package main
 import (
 	"context"
 	"log"
+	"log/slog"
 
 	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/pkg/http3"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 )
 
+type MyCustomRequestType struct {
+	UserName string `json:"user_name"`
+}
+
 type MyCustomResponseType struct {
-	UserId  string
-	Message string
+	UserId   string
+	UserName string
+	Message  string
 }
 
 func UserIdHandler(ctx context.Context, request interface{}) (response interface{}, err error) {
-	pathValues := ctx.Value(constants.HTTP_REQUEST_PATH_VALUES).(map[string]string)
+	req, err := http3.DecodeJsonRequest[MyCustomRequestType](request)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to transform request", "err", err)
+		return nil, err
+	}
+
+	pathValues := ctx.Value(constants.HttpRequestPathValues).(map[string]string)
 
 	return &MyCustomResponseType{
-		UserId:  pathValues["user_id"],
-		Message: "Hello World from GET.",
+		UserId:   pathValues["user_id"],
+		UserName: req.UserName,
+		Message:  "Hello World from GET.",
 	}, nil
 }
 

@@ -30,7 +30,7 @@ func streamingDefaultHandler(
 	}
 
 	ch := make(chan types.StreamChunk)
-	ctx = context.WithValue(ctx, constants.STREAMING_RESPONSE_CHANNEL_CONTEXT_KEY, ch)
+	ctx = context.WithValue(ctx, constants.StreamingResponseChannelContextKey, ch)
 
 	go func() {
 		defer close(ch)
@@ -54,7 +54,7 @@ func streamingDefaultHandler(
 	}()
 
 	for chunk := range ch {
-		headers := make(map[string][]string)
+		var headers map[string][]string
 		var encoded []byte
 		var err error
 

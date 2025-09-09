@@ -1,7 +1,17 @@
 service:
-  address:
-    ip: ""
-    port: 4431
+  http:
+    h3: 
+      address:
+        ip: ""
+        port: 4431
+    h1:
+      address:
+        ip: ""
+        port: 4431
+    h1_ssl:
+      address:
+        ip: ""
+        port: 443
   tls:
     generate_if_missing: true
     certificate:
@@ -10,6 +20,8 @@ service:
     key:
       raw: ""
       path: key.pem
-  http1_address:
-    ip: ""
-    port: 4431
+  mcp:
+    enabled: false
+    address:
+      ip: ""
+      port: 4432

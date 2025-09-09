@@ -2,7 +2,7 @@ package http3
 
 import (
 	"context"
-	"net/http"
+	"encoding/json"
 	"os"
 
 	"github.com/ayushanand18/as-http3lib/internal/config"
@@ -41,6 +41,13 @@ func injectConstantHeaders() map[string]string {
 	return defaultHeaders
 }
 
-func getNewContextForRequest(r *http.Request) context.Context {
-	return r.Context()
+func CastParams(in interface{}, out interface{}) (interface{}, error) {
+	b, err := json.Marshal(in)
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(b, out); err != nil {
+		return nil, err
+	}
+	return out, nil
 }

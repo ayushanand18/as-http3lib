@@ -4,14 +4,49 @@
 
 [![Go Tests](https://github.com/ayushanand18/as-http3lib/actions/workflows/test-examples.yml/badge.svg)](https://github.com/ayushanand18/as-http3lib/actions/workflows/test-examples.yml)
 
-An HTTP/1.1 + HTTP/2 + HTTP/3 server library written in pure Go. 
+A modern HTTP server library written in pure Go for faster prototyping.
 
 > [!NOTE]
 > Faster alternative to FastAPI, natively written in Golang.
 
+## Why use it?
+1. Fast prototyping, get started in less than 10 lines of code <- support H/1.1,2,3 without extra LOC.
+```go
+package main
+
+import (
+	"context"
+	"log"
+
+	"github.com/ayushanand18/as-http3lib/pkg/http3"
+	"github.com/ayushanand18/as-http3lib/pkg/types"
+)
+
+func main() {
+	ctx := context.Background()
+
+	server := http3.NewServer(ctx)
+	if err := server.Initialize(ctx); err != nil {
+		log.Fatalf("Server failed to Initialize: %v", err)
+	}
+
+	server.GET("/test").Serve(types.ServeOptions{
+		Handler: func(ctx context.Context, request interface{}) (response interface{}, err error) {
+			return "Hello World from GET.", nil
+		},
+	})
+
+	if err := server.ListenAndServe(ctx); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
+	}
+}
+```
+2. Built-in support for MCP, let your server accept MCP requests and handle them.
+3. Focus on server performance, benchmark results [here](#benchmark-results)
+
 ## Support
-1. Supports HTTP v1.1, v2, v3.
-2. Supports Self-signed TLS Certificates (guide to trust it locally on machine too).
+1. Supports HTTP v1.1, v2, v3 (+TLS).
+2. Supports HTTPS (self-signed/CA issued TLS Certificates) (guide to trust it locally on machine too).
 3. Supports streaming HTTP responses (LLM/media use-cases).
 
 ## Table of Contents
