@@ -2,7 +2,9 @@ package http3
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/ayushanand18/as-http3lib/internal/constants"
 	ashttp "github.com/ayushanand18/as-http3lib/internal/http"
@@ -16,7 +18,8 @@ func streamingDefaultHandler(
 	handler types.HandlerFunc,
 	decoder types.HttpDecoder,
 	encoder types.HttpEncoder,
-	r *http.Request) {
+	r *http.Request,
+	m *method) {
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -43,6 +46,20 @@ func streamingDefaultHandler(
 				w.WriteHeader(errors.DecodeErrorToHttpErrorStatus(err))
 				return
 			}
+		}
+
+		if m.rateLimiter != nil {
+			key := ctx.Value(constants.RateLimitCustomKey)
+			if key == nil || key == "" {
+				key = strings.Split(r.RemoteAddr, ":")[0]
+			}
+			_, ok := key.(string)
+			if !ok {
+				w.WriteHeader(http.StatusInternalServerError)
+				slog.ErrorContext(ctx, "rate limit key is not a string", "key:=", key)
+				return
+			}
+			m.rateLimiter.Allow(key.(string))
 		}
 
 		_, err = handler(ctx, request)

@@ -2,7 +2,9 @@ package http3
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/ayushanand18/as-http3lib/internal/constants"
 	ashttp "github.com/ayushanand18/as-http3lib/internal/http"
@@ -16,7 +18,8 @@ func httpDefaultHandler(
 	handler types.HandlerFunc,
 	decoder types.HttpDecoder,
 	encoder types.HttpEncoder,
-	r *http.Request) {
+	r *http.Request,
+	m *method) {
 
 	var request interface{}
 	var err error
@@ -24,6 +27,7 @@ func httpDefaultHandler(
 	ctx, err = defaultMiddleware(ctx, r)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+		slog.ErrorContext(ctx, "error in default middlewares", "err:=", err)
 		return
 	}
 
@@ -31,14 +35,30 @@ func httpDefaultHandler(
 		request, err = decoder(ctx, r)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			slog.ErrorContext(ctx, "error in decoding request", "err:=", err)
 			return
 		}
 	} else {
 		request, err = ashttp.DefaultHttpDecode(ctx, r)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			slog.ErrorContext(ctx, "error in decoding headers", "err:=", err)
 			return
 		}
+	}
+
+	if m.rateLimiter != nil {
+		key := ctx.Value(constants.RateLimitCustomKey)
+		if key == nil || key == "" {
+			key = strings.Split(r.RemoteAddr, ":")[0]
+		}
+		_, ok := key.(string)
+		if !ok {
+			w.WriteHeader(http.StatusInternalServerError)
+			slog.ErrorContext(ctx, "rate limit key is not a string", "key:=", key)
+			return
+		}
+		m.rateLimiter.Allow(key.(string))
 	}
 
 	resp, err := handler(ctx, request)
@@ -52,12 +72,14 @@ func httpDefaultHandler(
 		headers, body, err = encoder(ctx, resp)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			slog.ErrorContext(ctx, "error in encoding response", "err:=", err)
 			return
 		}
 	} else {
 		headers, body, err = ashttp.DefaultHttpEncode(ctx, resp)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
+			slog.ErrorContext(ctx, "error in default encoding response", "err:=", err)
 			return
 		}
 	}

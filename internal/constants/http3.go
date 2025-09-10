@@ -29,4 +29,5 @@ const (
 	HttpRequestHeaders                 ContextKeys = "request_headers"
 	HttpRequestURLParams               ContextKeys = "request_url_params"
 	HttpRequestPathValues              ContextKeys = "request_path_values"
+	RateLimitCustomKey                 ContextKeys = "rate_limit_custom_key"
 )

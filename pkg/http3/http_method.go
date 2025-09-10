@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/internal/mcp"
+	"github.com/ayushanand18/as-http3lib/internal/ratelimiter"
 	"github.com/ayushanand18/as-http3lib/pkg/types"
 )
 
@@ -14,6 +16,9 @@ type method struct {
 	Method constants.HttpMethodTypes
 	URL    string
 	s      *server
+
+	// utility
+	rateLimiter *ratelimiter.RateLimiter
 
 	// MCP specific fields (optional, only used for MCP_TOOL/RESOURCE/PROMPT)
 	mcpKind      string // "tool" | "resource" | "prompt"
@@ -27,6 +32,7 @@ type method struct {
 
 type Method interface {
 	Serve(types.ServeOptions)
+	WithRateLimit(types.RateLimitOptions) Method
 	WithDescription(desc string) Method
 	WithInputSchema(schema interface{}) Method
 	WithOutputSchema(schema interface{}) Method
@@ -104,9 +110,9 @@ func (m *method) Serve(options types.ServeOptions) {
 				}
 
 				if options.Options.IsStreamingResponse {
-					streamingDefaultHandler(r.Context(), w, handler, options.Decoder, options.Encoder, r)
+					streamingDefaultHandler(r.Context(), w, handler, options.Decoder, options.Encoder, r, m)
 				} else {
-					httpDefaultHandler(r.Context(), w, handler, options.Decoder, options.Encoder, r)
+					httpDefaultHandler(r.Context(), w, handler, options.Decoder, options.Encoder, r, m)
 				}
 			})
 		}
@@ -146,5 +152,11 @@ func (m *method) WithName(name string) Method {
 
 func (m *method) WithMimeType(mime string) Method {
 	m.mimeType = mime
+	return m
+}
+
+func (m *method) WithRateLimit(options types.RateLimitOptions) Method {
+	m.rateLimiter = ratelimiter.NewRateLimiter(options.Limit, time.Duration(options.BucketDurationInSeconds)*time.Second)
+
 	return m
 }
