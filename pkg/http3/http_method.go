@@ -84,15 +84,15 @@ func (m *method) Serve(options types.ServeOptions) {
 	default:
 		// fall back to HTTP registration
 		if _, ok := m.s.routeMatchMap[m.URL]; !ok {
-			m.s.routeMatchMap[m.URL] = make(map[constants.HttpMethodTypes]types.HandlerFunc)
+			m.s.routeMatchMap[m.URL] = make(map[constants.HttpMethodTypes]types.ServeOptions)
 		}
 
 		if _, ok := m.s.routeMatchMap[m.URL]; !ok {
-			m.s.routeMatchMap[m.URL] = make(map[constants.HttpMethodTypes]types.HandlerFunc)
+			m.s.routeMatchMap[m.URL] = make(map[constants.HttpMethodTypes]types.ServeOptions)
 		}
 
 		// if the combination exists, reassign it
-		m.s.routeMatchMap[m.URL][m.Method] = options.Handler
+		m.s.routeMatchMap[m.URL][m.Method] = options
 		if len(m.s.routeMatchMap[m.URL]) == 1 {
 			m.s.mux.HandleFunc(m.URL, func(w http.ResponseWriter, r *http.Request) {
 				requestMethod := constants.HttpMethodTypes(strings.ToUpper(r.Method))
@@ -103,16 +103,17 @@ func (m *method) Serve(options types.ServeOptions) {
 					return
 				}
 
-				handler, ok := methodHandlers[requestMethod]
+				opts, ok := methodHandlers[requestMethod]
 				if !ok {
 					http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 					return
 				}
 
+				DumpRequest(r)
 				if options.Options.IsStreamingResponse {
-					streamingDefaultHandler(r.Context(), w, handler, options.Decoder, options.Encoder, r, m)
+					streamingDefaultHandler(r.Context(), w, opts.Handler, opts.Decoder, opts.Encoder, r, m)
 				} else {
-					httpDefaultHandler(r.Context(), w, handler, options.Decoder, options.Encoder, r, m)
+					httpDefaultHandler(r.Context(), w, opts.Handler, opts.Decoder, opts.Encoder, r, m)
 				}
 			})
 		}

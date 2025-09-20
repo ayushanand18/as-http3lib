@@ -5,19 +5,21 @@ import (
 	"encoding/json"
 	"log/slog"
 
+	"github.com/ayushanand18/as-http3lib/internal/constants"
 	"github.com/ayushanand18/as-http3lib/internal/mcp"
 	"github.com/ayushanand18/as-http3lib/pkg/errors"
+	"github.com/ayushanand18/as-http3lib/pkg/types"
 )
 
 func (s *server) defaultUnhandledHandler(ctx context.Context, req mcp.McpRequest) (mcp.McpResponse, error) {
-	return mcp.McpResponse{}, errors.MethodNotAllowed.New("Method not allowed")
+	return s.handleMcpInitialize(ctx, req)
 }
 
 func (s *server) handleMcpInitialize(ctx context.Context, req mcp.McpRequest) (mcp.McpResponse, error) {
 	subscribeTrue := true
-	return mcp.McpResponse{
+	data := mcp.McpResponse{
 		JsonRpc: "2.0",
-		Id:      "1",
+		Id:      0,
 		Result: mcp.InitializeResult{
 			ProtocolVersion: "2025-06-18",
 			Capabilities: mcp.McpCapabilities{
@@ -39,7 +41,23 @@ func (s *server) handleMcpInitialize(ctx context.Context, req mcp.McpRequest) (m
 				Title:   "ashttp3-lib Mcp Server",
 			},
 		},
-	}, nil
+	}
+
+	dataStr, err := json.Marshal(data)
+	if err != nil {
+		slog.ErrorContext(ctx, "failed to marshal mcp initialize response", "error", err)
+		return mcp.McpResponse{}, errors.InternalServerError.New("failed to marshal mcp initialize response: " + err.Error())
+	}
+
+	channel, ok := ctx.Value(constants.StreamingResponseChannelContextKey).(chan types.StreamChunk)
+	if ok {
+		channel <- types.StreamChunk{
+			Id:   uint32(1),
+			Data: dataStr,
+		}
+	}
+
+	return data, nil
 }
 
 func (s *server) handleMcpNotificationsInitialized(ctx context.Context, req mcp.McpRequest) (mcp.McpResponse, error) {
@@ -180,5 +198,11 @@ func (s *server) handleMcpShutdown(ctx context.Context, req mcp.McpRequest) (mcp
 		Result: map[string]interface{}{
 			"message": "Server shutdown initiated",
 		},
+	}, nil
+}
+
+func healthCheckHandler(ctx context.Context, req interface{}) (interface{}, error) {
+	return map[string]string{
+		"status": "ok",
 	}, nil
 }

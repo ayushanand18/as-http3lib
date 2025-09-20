@@ -32,7 +32,7 @@ type server struct {
 	// hTTP server assets
 	h3server       qchttp3.Server
 	mux            *mux.Router
-	routeMatchMap  map[string]map[constants.HttpMethodTypes]types.HandlerFunc
+	routeMatchMap  map[string]map[constants.HttpMethodTypes]types.ServeOptions
 	http1ServerTLS http.Server
 	http1Server    http.Server
 
@@ -89,6 +89,6 @@ func NewServer(ctx context.Context) Server {
 			Addr: utils.GetMcpListeningAddress(ctx),
 		},
 		mux:           mux.NewRouter(),
-		routeMatchMap: make(map[string]map[constants.HttpMethodTypes]types.HandlerFunc),
+		routeMatchMap: make(map[string]map[constants.HttpMethodTypes]types.ServeOptions),
 	}
 }

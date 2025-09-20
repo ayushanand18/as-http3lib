@@ -1,8 +1,13 @@
 package http3
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
+	"log/slog"
+	"net/http"
+	"net/http/httputil"
 	"os"
 
 	"github.com/ayushanand18/as-http3lib/internal/config"
@@ -50,4 +55,26 @@ func CastParams(in interface{}, out interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return out, nil
+}
+
+// DumpRequest prints the full HTTP request (headers + body if present)
+func DumpRequest(req *http.Request) {
+	// Read and restore the body so it can be read again
+	var bodyBytes []byte
+	if req.Body != nil {
+		bodyBytes, _ = io.ReadAll(req.Body)
+		req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes)) // Restore body
+	}
+
+	// Dump the full request (headers + body)
+	dump, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		slog.Error("Failed to dump HTTP request", "error", err)
+		return
+	}
+
+	slog.Info("HTTP Request Dump", "method", req.Method, "url", req.URL.String(), "request", string(dump))
+
+	// Restore the body again to ensure downstream handlers can read it
+	req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 }

@@ -9,7 +9,7 @@ import (
 
 type McpRequest struct {
 	JsonRpc string          `json:"jsonrpc"`
-	Id      string          `json:"id"`
+	Id      float64         `json:"id"`
 	Method  McpMethodTypes  `json:"method"`
 	Params  json.RawMessage `json:"params"`
 }
@@ -35,7 +35,7 @@ type McpClientInfo struct {
 
 type McpResponse struct {
 	JsonRpc string      `json:"jsonrpc"`
-	Id      string      `json:"id"`
+	Id      float64     `json:"id"`
 	Result  interface{} `json:"result,omitempty"`
 	Error   *McpError   `json:"error,omitempty"`
 }

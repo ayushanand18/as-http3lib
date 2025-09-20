@@ -45,6 +45,14 @@ func (s *server) registerAllMcpHandlers(ctx context.Context) error {
 		Handler: s.mcpRootHandler(),
 	})
 
+	s.GET("/health").Serve(types.ServeOptions{
+		Handler: healthCheckHandler,
+	})
+
+	s.OPTIONS("/health").Serve(types.ServeOptions{
+		Handler: healthCheckHandler,
+	})
+
 	return nil
 }
 
@@ -70,7 +78,8 @@ func (s *server) handleMcpRequest(ctx context.Context, req interface{}) (interfa
 		return nil, errors.InternalServerError.New("Error while parsing MCP Request")
 	}
 
-	handler, ok := s.mcpMethodToHandlerMap[request.Method]
+	reqMethod := mcp.McpMethodTypes(request.Method)
+	handler, ok := s.mcpMethodToHandlerMap[reqMethod]
 	if !ok {
 		return s.defaultUnhandledHandler(ctx, request)
 	}
