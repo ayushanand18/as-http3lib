@@ -9,7 +9,6 @@ import (
 	"time"
 
 	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
-	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 func TestUserRoute_NaiveGETRequest(t *testing.T) {
@@ -21,10 +20,8 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 
-	server.GET("/test").Serve(types.ServeOptions{
-		Handler: func(ctx context.Context, request interface{}) (interface{}, error) {
-			return "Hello World from GET.", nil
-		},
+	server.GET("/test").Serve(func(ctx context.Context, request interface{}) (interface{}, error) {
+		return "Hello World from GET.", nil
 	})
 
 	go func() {
@@ -63,10 +60,8 @@ func TestUserRoute_NaivePOSTRequest(t *testing.T) {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 
-	server.POST("/test").Serve(types.ServeOptions{
-		Handler: func(ctx context.Context, request interface{}) (interface{}, error) {
-			return "Hello World from POST.", nil
-		},
+	server.POST("/test").Serve(func(ctx context.Context, request interface{}) (interface{}, error) {
+		return "Hello World from POST.", nil
 	})
 
 	go func() {

@@ -11,7 +11,6 @@ import (
 	"time"
 
 	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
-	"github.com/ayushanand18/crazyhttp/pkg/types"
 
 	qchttp3 "github.com/quic-go/quic-go/http3"
 )
@@ -30,13 +29,11 @@ func TestUserRoute_NaiveJSONResponse(t *testing.T) {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 
-	server.GET("/json").Serve(types.ServeOptions{
-		Handler: func(ctx context.Context, req interface{}) (interface{}, error) {
-			return DummyResponse{
-				Key:   "test",
-				Value: 123,
-			}, nil
-		},
+	server.GET("/json").Serve(func(ctx context.Context, req interface{}) (interface{}, error) {
+		return DummyResponse{
+			Key:   "test",
+			Value: 123,
+		}, nil
 	})
 
 	go func() {

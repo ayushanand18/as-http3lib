@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 	"strings"
 
 	"github.com/ayushanand18/crazyhttp/internal/config"
@@ -12,23 +13,6 @@ import (
 	"github.com/ayushanand18/crazyhttp/internal/tls"
 	"github.com/ayushanand18/crazyhttp/internal/utils"
 )
-
-func (h *rootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	for k, v := range injectConstantHeaders() {
-		w.Header().Set(k, v)
-	}
-
-	rec := &responseRecorder{ResponseWriter: w, status: 0}
-	h.mux.ServeHTTP(rec, r)
-
-	// log the incoming request
-	DumpRequest(r)
-
-	if !rec.wrote {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte("404 page not found\n"))
-	}
-}
 
 func (s *server) Initialize(ctx context.Context) error {
 	if config.GetBool(ctx, "service.tls.generate_if_missing", true) && checkIfTlsCertificateIsMissing(ctx) {
@@ -38,7 +22,7 @@ func (s *server) Initialize(ctx context.Context) error {
 	}
 
 	tlsConfig := tls.GenerateTLSConfig(ctx)
-	root := &rootHandler{mux: s.mux}
+	root := &rootHandler{mux: s.mux, s: s}
 
 	s.h3server.Handler = root
 	s.h3server.TLSConfig = tlsConfig
@@ -58,23 +42,38 @@ func (s *server) Initialize(ctx context.Context) error {
 
 func (s *server) ListenAndServe(ctx context.Context) error {
 	utils.PrintStartBanner()
+
+	// populate mux from routeMatchMap
+	for pattern, methods := range s.routeMatchMap {
+		for httpMethod, m := range methods {
+			s.mux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+				// call the right handler (streaming or normal)
+				if m.options.IsStreamingResponse {
+					streamingDefaultHandler(r.Context(), w, m.handler, m.decoder, m.encoder, r, m)
+				} else {
+					httpDefaultHandler(r.Context(), w, m.handler, m.decoder, m.encoder, r, m)
+				}
+			}).Methods(string(httpMethod))
+		}
+	}
+
+	// wire mux as the Handler for all servers
+	s.h3server.Handler = s.mux
+	s.http1Server.Handler = s.mux
+	s.http1ServerTLS.Handler = s.mux
+
 	errChan := make(chan error, 3)
 
 	go func() {
-		// server over http/3
 		slog.InfoContext(ctx, "Starting HTTP/3 server", "port", s.h3server.Addr)
 		errChan <- s.h3server.ListenAndServe()
 	}()
-
 	go func() {
 		slog.InfoContext(ctx, "Starting HTTP/1.1 + Alt-Svc server", "port", s.http1Server.Addr)
-		// server over http
 		errChan <- s.http1Server.ListenAndServe()
 	}()
-
 	go func() {
-		slog.InfoContext(ctx, "Starting HTTP/1.1 + Alt-Svc server (HTTPS)", "port", s.http1ServerTLS.Addr)
-		// server over https
+		slog.InfoContext(ctx, "Starting HTTPS server", "port", s.http1ServerTLS.Addr)
 		errChan <- s.http1ServerTLS.ListenAndServeTLS("", "")
 	}()
 
@@ -115,4 +114,20 @@ func (s *server) CONNECT(url string) Method {
 
 func (s *server) TRACE(url string) Method {
 	return NewMethod(constants.HttpMethodTrace, url, s)
+}
+
+// serve the HTTP request, and provide a response
+func (h *rootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			slog.ErrorContext(r.Context(), "panic recovered: %v\n%s", err, debug.Stack())
+		}
+	}()
+	for k, v := range injectConstantHeaders() {
+		w.Header().Set(k, v)
+	}
+	DumpRequest(r)
+
+	h.mux.ServeHTTP(w, r)
 }

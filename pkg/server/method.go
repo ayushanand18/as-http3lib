@@ -2,8 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/ayushanand18/crazyhttp/internal/constants"
@@ -19,15 +17,26 @@ type method struct {
 	// utility
 	rateLimiter *ratelimiter.RateLimiter
 
-	description  string
-	inputSchema  interface{}
-	outputSchema interface{}
-	name         string
-	handler      types.HandlerFunc
+	description           string
+	inputSchema           interface{}
+	outputSchema          interface{}
+	name                  string
+	handler               types.HandlerFunc
+	decoder               types.HttpDecoder
+	encoder               types.HttpEncoder
+	beforeServeMiddleware types.HttpRequestMiddleware
+	afterServeMiddleware  types.HttpResponseMiddleware
+	options               types.MethodOptions
 }
 
 type Method interface {
-	Serve(types.ServeOptions)
+	Serve(types.HandlerFunc) Method
+
+	WithDecoder(decoder types.HttpDecoder) Method
+	WithEncoder(encoder types.HttpEncoder) Method
+	WithBeforeServe(middleware types.HttpRequestMiddleware) Method
+	WithAfterServe(middleware types.HttpResponseMiddleware) Method
+	WithOptions(options types.MethodOptions) Method
 
 	WithRateLimit(types.RateLimitOptions) Method
 	WithDescription(desc string) Method
@@ -44,43 +53,17 @@ func NewMethod(httpMethod constants.HttpMethodTypes, url string, s *server) Meth
 	}
 }
 
-func (m *method) Serve(options types.ServeOptions) {
-	m.handler = options.Handler
+func (m *method) Serve(handler types.HandlerFunc) Method {
+	m.handler = handler
 
 	if _, ok := m.s.routeMatchMap[m.URL]; !ok {
-		m.s.routeMatchMap[m.URL] = make(map[constants.HttpMethodTypes]types.ServeOptions)
-	}
-
-	if _, ok := m.s.routeMatchMap[m.URL]; !ok {
-		m.s.routeMatchMap[m.URL] = make(map[constants.HttpMethodTypes]types.ServeOptions)
+		m.s.routeMatchMap[m.URL] = make(map[constants.HttpMethodTypes]*method)
 	}
 
 	// if the combination exists, reassign it
-	m.s.routeMatchMap[m.URL][m.Method] = options
-	if len(m.s.routeMatchMap[m.URL]) == 1 {
-		m.s.mux.HandleFunc(m.URL, func(w http.ResponseWriter, r *http.Request) {
-			requestMethod := constants.HttpMethodTypes(strings.ToUpper(r.Method))
+	m.s.routeMatchMap[m.URL][m.Method] = m
 
-			methodHandlers, ok := m.s.routeMatchMap[m.URL]
-			if !ok {
-				http.Error(w, "Not Found", http.StatusNotFound)
-				return
-			}
-
-			opts, ok := methodHandlers[requestMethod]
-			if !ok {
-				http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-				return
-			}
-
-			DumpRequest(r)
-			if options.Options.IsStreamingResponse {
-				streamingDefaultHandler(r.Context(), w, opts.Handler, opts.Decoder, opts.Encoder, r, m)
-			} else {
-				httpDefaultHandler(r.Context(), w, opts.Handler, opts.Decoder, opts.Encoder, r, m)
-			}
-		})
-	}
+	return m
 }
 
 func DecodeJsonRequest[T any](in interface{}) (T, error) {
@@ -117,5 +100,30 @@ func (m *method) WithName(name string) Method {
 func (m *method) WithRateLimit(options types.RateLimitOptions) Method {
 	m.rateLimiter = ratelimiter.NewRateLimiter(options.Limit, time.Duration(options.BucketDurationInSeconds)*time.Second)
 
+	return m
+}
+
+func (m *method) WithDecoder(decoder types.HttpDecoder) Method {
+	m.decoder = decoder
+	return m
+}
+
+func (m *method) WithEncoder(encoder types.HttpEncoder) Method {
+	m.encoder = encoder
+	return m
+}
+
+func (m *method) WithBeforeServe(middleware types.HttpRequestMiddleware) Method {
+	m.beforeServeMiddleware = middleware
+	return m
+}
+
+func (m *method) WithAfterServe(middleware types.HttpResponseMiddleware) Method {
+	m.afterServeMiddleware = middleware
+	return m
+}
+
+func (m *method) WithOptions(options types.MethodOptions) Method {
+	m.options = options
 	return m
 }

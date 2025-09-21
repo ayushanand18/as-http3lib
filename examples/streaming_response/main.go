@@ -33,12 +33,10 @@ func main() {
 		log.Fatalf("Server failed to Initialize: %v", err)
 	}
 
-	server.GET("/streaming").Serve(types.ServeOptions{
-		Handler: HelloWorldStreaming,
-		Options: types.MethodOptions{
+	server.GET("/streaming").Serve(HelloWorldStreaming).
+		WithOptions(types.MethodOptions{
 			IsStreamingResponse: true,
-		},
-	})
+		})
 
 	if err := server.ListenAndServe(ctx); err != nil {
 		log.Fatalf("Server failed to start: %v", err)

@@ -7,7 +7,6 @@ import (
 
 	"github.com/ayushanand18/crazyhttp/internal/constants"
 	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
-	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 type MyCustomRequestType struct {
@@ -44,9 +43,7 @@ func main() {
 		log.Fatalf("Server failed to Initialize: %v", err)
 	}
 
-	server.GET("/users/{user_id}").Serve(types.ServeOptions{
-		Handler: UserIdHandler,
-	})
+	server.GET("/users/{user_id}").Serve(UserIdHandler)
 
 	if err := server.ListenAndServe(ctx); err != nil {
 		log.Fatalf("Server failed to start: %v", err)

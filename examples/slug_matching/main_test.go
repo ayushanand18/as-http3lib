@@ -11,7 +11,6 @@ import (
 
 	"github.com/ayushanand18/crazyhttp/internal/constants"
 	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
-	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 type MyCustomResponseType struct {
@@ -19,7 +18,7 @@ type MyCustomResponseType struct {
 	Message string
 }
 
-func Encoder(ctx context.Context, response interface{}) (headers map[string][]string, body []byte, err error) {
+func encoder(ctx context.Context, response interface{}) (headers map[string][]string, body []byte, err error) {
 	resp := response.(MyCustomResponseType)
 	headers = make(map[string][]string)
 	headers["X-User-Id"] = []string{resp.UserId}
@@ -50,10 +49,13 @@ func TestUserRoute_WithUserIdHeader(t *testing.T) {
 		t.Fatalf("Initialize failed: %v", err)
 	}
 
-	server.GET("/users/{user_id}").Serve(types.ServeOptions{
-		Handler: UserIdHandler,
-		Encoder: Encoder,
-	})
+	m := server.GET("/users/{user_id}").
+		WithEncoder(encoder).
+		Serve(UserIdHandler)
+
+	if m == nil {
+		
+	}
 
 	go func() {
 		_ = server.ListenAndServe(ctx)

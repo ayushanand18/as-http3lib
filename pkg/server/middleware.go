@@ -34,4 +34,5 @@ func (r *responseRecorder) Flush() {
 
 type rootHandler struct {
 	mux *mux.Router
+	s   *server
 }

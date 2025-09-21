@@ -7,7 +7,6 @@ import (
 
 	"github.com/ayushanand18/crazyhttp/pkg/errors"
 	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
-	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 func main() {
@@ -18,25 +17,21 @@ func main() {
 		log.Fatalf("Server failed to Initialize: %v", err)
 	}
 
-	server.GET("/audio").Serve(types.ServeOptions{
-		Handler: func(ctx context.Context, request interface{}) (interface{}, error) {
-			audioBytes, err := os.ReadFile("complete_quest_requirement.mp3")
-			if err != nil {
-				return nil, errors.InternalServerError.New("Could not read audio file.")
-			}
+	server.GET("/audio").Serve(func(ctx context.Context, request interface{}) (interface{}, error) {
+		audioBytes, err := os.ReadFile("complete_quest_requirement.mp3")
+		if err != nil {
+			return nil, errors.InternalServerError.New("Could not read audio file.")
+		}
 
-			return audioBytes, nil
-		},
+		return audioBytes, nil
 	})
 
-	server.GET("/html_file.html").Serve(types.ServeOptions{
-		Handler: func(ctx context.Context, request interface{}) (interface{}, error) {
-			fileBytes, err := os.ReadFile("html_file.html")
-			if err != nil {
-				return nil, errors.InternalServerError.New("Could not read html file.")
-			}
-			return fileBytes, nil
-		},
+	server.GET("/html_file.html").Serve(func(ctx context.Context, request interface{}) (interface{}, error) {
+		fileBytes, err := os.ReadFile("html_file.html")
+		if err != nil {
+			return nil, errors.InternalServerError.New("Could not read html file.")
+		}
+		return fileBytes, nil
 	})
 
 	if err := server.ListenAndServe(ctx); err != nil {

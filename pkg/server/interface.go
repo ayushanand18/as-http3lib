@@ -6,7 +6,6 @@ import (
 
 	"github.com/ayushanand18/crazyhttp/internal/constants"
 	"github.com/ayushanand18/crazyhttp/internal/utils"
-	"github.com/ayushanand18/crazyhttp/pkg/types"
 	"github.com/gorilla/mux"
 	"github.com/quic-go/quic-go"
 	qchttp3 "github.com/quic-go/quic-go/http3"
@@ -14,10 +13,10 @@ import (
 )
 
 type server struct {
-	// hTTP server assets
+	// HTTP server assets
 	h3server       qchttp3.Server
 	mux            *mux.Router
-	routeMatchMap  map[string]map[constants.HttpMethodTypes]types.ServeOptions
+	routeMatchMap  map[string]map[constants.HttpMethodTypes]*method
 	http1ServerTLS http.Server
 	http1Server    http.Server
 }
@@ -58,6 +57,6 @@ func NewHttpServer(ctx context.Context) HttpServer {
 			Addr: utils.GetHttp1TLSListeningAddress(ctx),
 		},
 		mux:           mux.NewRouter(),
-		routeMatchMap: make(map[string]map[constants.HttpMethodTypes]types.ServeOptions),
+		routeMatchMap: make(map[string]map[constants.HttpMethodTypes]*method),
 	}
 }

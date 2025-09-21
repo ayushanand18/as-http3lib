@@ -37,12 +37,10 @@ func TestHTTP3Server_BasicStreamingResponse(t *testing.T) {
 		t.Fatalf("server initialization failed: %v", err)
 	}
 
-	s.GET("/streaming").Serve(types.ServeOptions{
-		Handler: HelloWorldStreaming,
-		Options: types.MethodOptions{
+	s.GET("/streaming").Serve(HelloWorldStreaming).
+		WithOptions(types.MethodOptions{
 			IsStreamingResponse: true,
-		},
-	})
+		})
 
 	go func() {
 		_ = s.ListenAndServe(ctx)

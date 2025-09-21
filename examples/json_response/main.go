@@ -5,7 +5,6 @@ import (
 	"log"
 
 	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
-	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 type DummyResponse struct {
@@ -28,9 +27,7 @@ func main() {
 		log.Fatalf("Server failed to Initialize: %v", err)
 	}
 
-	server.GET("/json").Serve(types.ServeOptions{
-		Handler: HelloWorldGet,
-	})
+	server.GET("/json").Serve(HelloWorldGet)
 
 	if err := server.ListenAndServe(ctx); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
