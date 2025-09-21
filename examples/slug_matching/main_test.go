@@ -2,7 +2,6 @@ package main_test
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +12,6 @@ import (
 	"github.com/ayushanand18/crazyhttp/internal/constants"
 	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
-	qchttp3 "github.com/quic-go/quic-go/http3"
 )
 
 type MyCustomResponseType struct {
@@ -62,15 +60,9 @@ func TestUserRoute_WithUserIdHeader(t *testing.T) {
 	}()
 	time.Sleep(500 * time.Millisecond)
 
-	client := &http.Client{
-		Transport: &qchttp3.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
-			},
-		},
-	}
+	client := &http.Client{}
 
-	resp, err := client.Get(fmt.Sprintf("https://%s/users/123", addr))
+	resp, err := client.Get(fmt.Sprintf("http://%s/users/123", addr))
 	if err != nil {
 		t.Fatalf("Request failed: %v", err)
 	}

@@ -51,7 +51,7 @@ func TestHTTP3Server_BasicStreamingResponse(t *testing.T) {
 
 	client := &http.Client{}
 
-	resp, err := client.Get(fmt.Sprintf("https://%s/streaming", addr))
+	resp, err := client.Get(fmt.Sprintf("http://%s/streaming", addr))
 	if err != nil {
 		t.Fatalf("failed to make request: %v", err)
 	}

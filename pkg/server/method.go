@@ -28,6 +28,7 @@ type method struct {
 
 type Method interface {
 	Serve(types.ServeOptions)
+
 	WithRateLimit(types.RateLimitOptions) Method
 	WithDescription(desc string) Method
 	WithInputSchema(schema interface{}) Method

@@ -34,7 +34,7 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 
 	client := &http.Client{}
 
-	resp, err := client.Get(fmt.Sprintf("https://%s/test", addr))
+	resp, err := client.Get(fmt.Sprintf("http://%s/test", addr))
 	if err != nil {
 		t.Fatalf("Request failed: %v", err)
 	}
@@ -77,7 +77,7 @@ func TestUserRoute_NaivePOSTRequest(t *testing.T) {
 	client := &http.Client{}
 
 	contentType := "text/plain; utf-8"
-	resp, err := client.Post(fmt.Sprintf("https://%s/test", addr), contentType, nil)
+	resp, err := client.Post(fmt.Sprintf("http://%s/test", addr), contentType, nil)
 	if err != nil {
 		t.Fatalf("Request failed: %v", err)
 	}
