@@ -17,7 +17,7 @@ var (
 
 func loadConfig() {
 	once.Do(func() {
-		file, err := os.ReadFile("config.yaml")
+		file, err := os.ReadFile("configs/config.yaml")
 		if err == nil {
 			loadErr = yaml.Unmarshal(file, &configData)
 			return

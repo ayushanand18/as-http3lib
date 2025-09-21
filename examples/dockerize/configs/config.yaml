@@ -1,25 +1,28 @@
 service:
   http:
     h3: 
+      enabled: true
       address:
         ip: ""
         port: 4431
     h1:
+      enabled: true
       address:
         ip: ""
         port: 4431
     h1_ssl:
+      enabled: true
       address:
         ip: ""
-        port: 4432
+        port: 443
   tls:
     generate_if_missing: true
     certificate:
       raw: ""
-      path: cert.pem
+      path: configs/cert.pem
     key:
       raw: ""
-      path: key.pem
+      path: configs/key.pem
   mcp:
     enabled: false
     address:

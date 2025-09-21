@@ -4,20 +4,26 @@ Steps to run a simple crazyhttp server. The following directives are genric
 but have been tested only on `arch`. You should ideally use an equivalent command
 in your distro and it should work.
 
+### Tl;dr
+1. `go get github.com/ayushanand18/crazyhttp`
+2. Copy an example from `examples/`
+3. `go build`
+And you are done!
+
 ### Setting up the server
 1. Install prerequisite tools
     + [go 1.24.4](https://go.dev) (should work with any go version > 1.20, but this project has go v1.24)
         `sudo pacman -Syu go`
-    + mkcert, to generate a self signed SSL certificate.
+    + mkcert, to generate a self signed SSL certificate. [only if you use http3/http1 with tls]
         `sudo pacman -S mkcert`
         `sudo pacman -S openssh`, might also require openssh
     + might need these libs too for debugging issues, or diving further.
         `sudo pacman -S tcpdump lsof`
 2. Go over to `examples/` directory, and use any example to run. Say we do a naive server implementation. `cd naive/`
-3. Populate your config.yaml, for TLS certificate, populate either path or raw. In raw, you can simply put
-   file contents of your script as-is after escaping new line with `\n`. Remember spaces are consider as 
+3. [Skip if you are using http over v1] Populate your config.yaml, for TLS certificate, populate either path or raw. 
+   In raw, you can simply put file contents of your script as-is after escaping new line with `\n`. Remember spaces are consider as 
    different characters in certificate and should be removed.
-4. Run `go mod run main.go`. If you see any error in port allocation make sure to grant privelege for lower numbered ports.
+4. Run `go run main.go`. If you see any error in port allocation make sure to grant privelege for lower numbered ports.
    We are using port 443 for all our examples here.
 
 A server directory should simply look like 
@@ -27,9 +33,9 @@ go-project/
 | 
 |   ## only 3 files are needed
 |   ...
-├── config.yaml // must be in root directory
-├── cert.pem // not needed if you populate certificate.raw in config.yaml; path is configurable, can be anywhere
-├── key.pem // not needed if you populate key.raw in config.yaml; path is configurable, can be anywhere
+├── configs/config.yaml // must be accessible root directory
+├── configs/cert.pem // not needed if you populate certificate.raw in config.yaml/H1.1; path is configurable, can be anywhere
+├── configs/key.pem // not needed if you populate key.raw in config.yaml/H1.1; path is configurable, can be anywhere
 |   ...
 | 
 |
@@ -38,7 +44,7 @@ go-project/
 
 ```
 
-### Setting up the client
+### Setting up the client [Required only if self-signed certificates and running on HTTPS]
 Trust the Root CA of your certificate, you should find it in `/etc/ssl/certs/ca-certificates.crt` or 
 all the below examples will have a way to pass certificates explicitely. Omit them if you have trusted already.
 

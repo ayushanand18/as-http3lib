@@ -1,14 +1,17 @@
 service:
   http:
     h3: 
+      enabled: true
       address:
         ip: ""
         port: 4431
     h1:
+      enabled: true
       address:
         ip: ""
         port: 4431
     h1_ssl:
+      enabled: true
       address:
         ip: ""
         port: 443

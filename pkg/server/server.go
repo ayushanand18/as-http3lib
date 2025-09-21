@@ -64,18 +64,26 @@ func (s *server) ListenAndServe(ctx context.Context) error {
 
 	errChan := make(chan error, 3)
 
-	go func() {
-		slog.InfoContext(ctx, "Starting HTTP/3 server", "port", s.h3server.Addr)
-		errChan <- s.h3server.ListenAndServe()
-	}()
-	go func() {
-		slog.InfoContext(ctx, "Starting HTTP/1.1 + Alt-Svc server", "port", s.http1Server.Addr)
-		errChan <- s.http1Server.ListenAndServe()
-	}()
-	go func() {
-		slog.InfoContext(ctx, "Starting HTTPS server", "port", s.http1ServerTLS.Addr)
-		errChan <- s.http1ServerTLS.ListenAndServeTLS("", "")
-	}()
+	if config.GetBool(ctx, "service.http.h3.enabled", false) {
+		go func() {
+			slog.InfoContext(ctx, "Starting HTTP/3 server", "port", s.h3server.Addr)
+			errChan <- s.h3server.ListenAndServe()
+		}()
+	}
+
+	if config.GetBool(ctx, "service.http.h1.enabled", false) {
+		go func() {
+			slog.InfoContext(ctx, "Starting HTTP/1.1 + Alt-Svc server", "port", s.http1Server.Addr)
+			errChan <- s.http1Server.ListenAndServe()
+		}()
+	}
+
+	if config.GetBool(ctx, "service.http.h1_ssl.enabled", false) {
+		go func() {
+			slog.InfoContext(ctx, "Starting HTTPS server", "port", s.http1ServerTLS.Addr)
+			errChan <- s.http1ServerTLS.ListenAndServeTLS("", "")
+		}()
+	}
 
 	return <-errChan
 }
