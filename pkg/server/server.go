@@ -13,6 +13,23 @@ import (
 	"github.com/ayushanand18/crazyhttp/internal/utils"
 )
 
+func (h *rootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	for k, v := range injectConstantHeaders() {
+		w.Header().Set(k, v)
+	}
+
+	rec := &responseRecorder{ResponseWriter: w, status: 0}
+	h.mux.ServeHTTP(rec, r)
+
+	// log the incoming request
+	DumpRequest(r)
+
+	if !rec.wrote {
+		w.WriteHeader(http.StatusNotFound)
+		_, _ = w.Write([]byte("404 page not found\n"))
+	}
+}
+
 func (s *server) Initialize(ctx context.Context) error {
 	if config.GetBool(ctx, "service.tls.generate_if_missing", true) && checkIfTlsCertificateIsMissing(ctx) {
 		if err := tls.GenerateSelfSignedCert(ctx); err != nil {
@@ -36,7 +53,6 @@ func (s *server) Initialize(ctx context.Context) error {
 	s.http1ServerTLS.Handler = h1Handler
 	s.http1ServerTLS.TLSConfig = tlsConfig
 
-	s.mcpServer.Handler = h1Handler
 	return nil
 }
 
