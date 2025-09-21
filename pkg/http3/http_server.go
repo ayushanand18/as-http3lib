@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ayushanand18/as-http3lib/internal/config"
-	"github.com/ayushanand18/as-http3lib/internal/constants"
-	"github.com/ayushanand18/as-http3lib/internal/tls"
-	"github.com/ayushanand18/as-http3lib/internal/utils"
+	"github.com/ayushanand18/crazyhttp/internal/config"
+	"github.com/ayushanand18/crazyhttp/internal/constants"
+	"github.com/ayushanand18/crazyhttp/internal/tls"
+	"github.com/ayushanand18/crazyhttp/internal/utils"
 )
 
 func (s *server) Initialize(ctx context.Context) error {

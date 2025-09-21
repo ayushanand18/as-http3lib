@@ -1,8 +1,8 @@
-![as-http3lib](/assets/logo-startup.png)
+![crazyhttp](/assets/logo-startup.png)
 
-# as-http3lib
+# crazyhttp
 
-[![Go Tests](https://github.com/ayushanand18/as-http3lib/actions/workflows/test-examples.yml/badge.svg)](https://github.com/ayushanand18/as-http3lib/actions/workflows/test-examples.yml)
+[![Go Tests](https://github.com/ayushanand18/crazyhttp/actions/workflows/test-examples.yml/badge.svg)](https://github.com/ayushanand18/crazyhttp/actions/workflows/test-examples.yml)
 
 A modern HTTP server library written in pure Go for faster prototyping.
 
@@ -18,8 +18,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/ayushanand18/as-http3lib/pkg/http3"
-	"github.com/ayushanand18/as-http3lib/pkg/types"
+	"github.com/ayushanand18/crazyhttp/pkg/http3"
+	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 func main() {
@@ -61,14 +61,14 @@ func main() {
 ## Installation
 > Import the Go package in your service using
 ```sh
-go mod add github.com/ayushanand18/as-http3lib
+go mod add github.com/ayushanand18/crazyhttp
 ```
 
 ### Benchmark Results
 > [!Note]
 > More information [here](/notes/PERFORMANCE.md)
 
-Parameter        | ashttp3lib::h1  | FastAPI (H/1.1)| ashttp3lib::h3  | ashttp3lib-go::h3 [latest]
+Parameter        | crazyhttp::h1   | FastAPI (H/1.1)| crazyhttp::h3  | crazyhttp::h3 [latest]
 -----------------|-----------------|----------------|-----------------|---------------------------
 Startup Time     | 0.005 s         | 0.681 s        | 0.014 s         | 4.4499ms
 RTT (p50)        |                 |                |                 | 1.751ms

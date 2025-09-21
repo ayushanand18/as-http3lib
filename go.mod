@@ -1,4 +1,4 @@
-module github.com/ayushanand18/as-http3lib
+module github.com/ayushanand18/crazyhttp
 
 go 1.23
 

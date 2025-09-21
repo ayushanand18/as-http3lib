@@ -24,4 +24,4 @@ service:
     enabled: true
     address:
       ip: ""
-      port: 6277
+      port: 4432

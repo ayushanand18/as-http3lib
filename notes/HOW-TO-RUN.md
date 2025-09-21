@@ -1,6 +1,6 @@
 ## How To Run
 
-Steps to run a simple as-http3lib server. The following directives are genric
+Steps to run a simple crazyhttp server. The following directives are genric
 but have been tested only on `arch`. You should ideally use an equivalent command
 in your distro and it should work.
 

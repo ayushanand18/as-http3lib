@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ayushanand18/as-http3lib/internal/constants"
-	ashttp "github.com/ayushanand18/as-http3lib/internal/http"
-	"github.com/ayushanand18/as-http3lib/pkg/errors"
-	"github.com/ayushanand18/as-http3lib/pkg/types"
+	"github.com/ayushanand18/crazyhttp/internal/constants"
+	ashttp "github.com/ayushanand18/crazyhttp/internal/http"
+	"github.com/ayushanand18/crazyhttp/pkg/errors"
+	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 func streamingDefaultHandler(

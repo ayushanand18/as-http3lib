@@ -13,7 +13,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/ayushanand18/as-http3lib/internal/config"
+	"github.com/ayushanand18/crazyhttp/internal/config"
 )
 
 func GenerateSelfSignedCert(ctx context.Context) error {

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CERT_NAME="as-http3lib-local"
+CERT_NAME="crazyhttp-local"
 CA_KEY="ca.key.pem"
 CA_CERT="ca.cert.pem"
 SERVER_KEY="key.pem"

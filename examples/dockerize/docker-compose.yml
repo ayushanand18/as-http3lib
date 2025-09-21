@@ -1,9 +1,9 @@
 version: "1.0"
 
 services:
-  as-http3lib-server:
+  crazyhttp-server:
     build: .
-    container_name: as-http3lib-server
+    container_name: crazyhttp-server
     ports:
       - "4431:4431/tcp"
       - "4431:4431/udp"

@@ -1,9 +1,9 @@
 version: "2.0"
 
 services:
-  as-http3lib-server:
+  crazyhttp-server:
     build: .
-    container_name: as-http3lib-server
+    container_name: crazyhttp-server
     ports:
       - "4432:4432/tcp"
       - "4430:4430/tcp"

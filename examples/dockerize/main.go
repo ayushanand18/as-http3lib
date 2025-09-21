@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
-	"github.com/ayushanand18/as-http3lib/pkg/http3"
-	"github.com/ayushanand18/as-http3lib/pkg/types"
+	"github.com/ayushanand18/crazyhttp/pkg/http3"
+	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 func main() {

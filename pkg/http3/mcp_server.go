@@ -4,10 +4,10 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/ayushanand18/as-http3lib/internal/mcp"
-	"github.com/ayushanand18/as-http3lib/internal/utils"
-	"github.com/ayushanand18/as-http3lib/pkg/errors"
-	"github.com/ayushanand18/as-http3lib/pkg/types"
+	"github.com/ayushanand18/crazyhttp/internal/mcp"
+	"github.com/ayushanand18/crazyhttp/internal/utils"
+	"github.com/ayushanand18/crazyhttp/pkg/errors"
+	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 func (s *server) ListenAndServeMcp(ctx context.Context) error {

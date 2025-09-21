@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ayushanand18/as-http3lib/internal/constants"
-	"github.com/ayushanand18/as-http3lib/internal/mcp"
-	"github.com/ayushanand18/as-http3lib/internal/ratelimiter"
-	"github.com/ayushanand18/as-http3lib/pkg/types"
+	"github.com/ayushanand18/crazyhttp/internal/constants"
+	"github.com/ayushanand18/crazyhttp/internal/mcp"
+	"github.com/ayushanand18/crazyhttp/internal/ratelimiter"
+	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 type method struct {

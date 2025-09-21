@@ -6,9 +6,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/ayushanand18/as-http3lib/internal/constants"
-	"github.com/ayushanand18/as-http3lib/pkg/http3"
-	"github.com/ayushanand18/as-http3lib/pkg/types"
+	"github.com/ayushanand18/crazyhttp/internal/constants"
+	"github.com/ayushanand18/crazyhttp/pkg/http3"
+	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 func HelloWorldStreaming(ctx context.Context, request interface{}) (response interface{}, err error) {

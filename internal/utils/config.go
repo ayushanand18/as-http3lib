@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/ayushanand18/as-http3lib/internal/config"
-	"github.com/ayushanand18/as-http3lib/internal/constants"
+	"github.com/ayushanand18/crazyhttp/internal/config"
+	"github.com/ayushanand18/crazyhttp/internal/constants"
 )
 
 func GetListeningAddress(ctx context.Context) string {

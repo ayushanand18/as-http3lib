@@ -10,7 +10,7 @@ import (
 	"net/http/httputil"
 	"os"
 
-	"github.com/ayushanand18/as-http3lib/internal/config"
+	"github.com/ayushanand18/crazyhttp/internal/config"
 )
 
 func checkIfTlsCertificateIsMissing(ctx context.Context) bool {

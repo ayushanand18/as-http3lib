@@ -1,5 +1,10 @@
 # Changelog
 
+2.0.0
+---------------
+* Rename lib to `crazyhttp`
+* remove mcp support, and refactor lib for a better DX
+
 1.2.0
 ---------------
 * Support HTTP (without TLS)
@@ -18,4 +23,4 @@
 
 0.0.1 - alpha
 ---------------
-- First alpha release of `as-http3lib`. 
+- First alpha release of `crazyhttp`. 
