@@ -30,11 +30,9 @@ func main() {
 		log.Fatalf("Server failed to Initialize: %v", err)
 	}
 
-	server.GET("/test").Serve(types.ServeOptions{
-		Handler: func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	server.GET("/test").Serve(func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			return "Hello World from GET.", nil
-		},
-	})
+		})
 
 	if err := server.ListenAndServe(ctx); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
