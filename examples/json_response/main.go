@@ -4,7 +4,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/ayushanand18/crazyhttp/pkg/http3"
+	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
@@ -23,7 +23,7 @@ func HelloWorldGet(ctx context.Context, request interface{}) (response interface
 func main() {
 	ctx := context.Background()
 
-	server := http3.NewServer(ctx)
+	server := crazyserver.NewHttpServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
 		log.Fatalf("Server failed to Initialize: %v", err)
 	}

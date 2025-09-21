@@ -11,14 +11,14 @@ import (
 	"time"
 
 	"github.com/ayushanand18/crazyhttp/pkg/errors"
-	"github.com/ayushanand18/crazyhttp/pkg/http3"
+	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
 	qchttp3 "github.com/quic-go/quic-go/http3"
 )
 
-func setupTestServer(ctx context.Context) (*http3.Server, string) {
+func setupTestServer(ctx context.Context) (*crazyserver.HttpServer, string) {
 	addr := "localhost:4431"
-	server := http3.NewServer(ctx)
+	server := crazyserver.NewHttpServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
 		panic(fmt.Sprintf("Server initialization failed: %v", err))
 	}

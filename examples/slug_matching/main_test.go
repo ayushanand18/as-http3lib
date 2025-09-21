@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/ayushanand18/crazyhttp/internal/constants"
-	"github.com/ayushanand18/crazyhttp/pkg/http3"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
 	qchttp3 "github.com/quic-go/quic-go/http3"
 )
@@ -47,7 +46,7 @@ func TestUserRoute_WithUserIdHeader(t *testing.T) {
 	ctx := context.Background()
 	addr := "localhost:4431"
 
-	server := http3.NewServer(ctx)
+	server := crazyserver.NewHttpServer(ctx)
 	if err := server.Initialize(ctx); err != nil {
 		t.Fatalf("Initialize failed: %v", err)
 	}

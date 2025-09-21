@@ -1,4 +1,4 @@
-package http3
+package server
 
 import (
 	"context"
@@ -38,7 +38,7 @@ type HttpServer interface {
 	TRACE(string) Method
 }
 
-func NewServer(ctx context.Context) HttpServer {
+func NewHttpServer(ctx context.Context) HttpServer {
 	quicConfig := &quic.Config{
 		Tracer:          qlog.DefaultConnectionTracer,
 		Allow0RTT:       true,

@@ -1,4 +1,4 @@
-package http3
+package server
 
 import (
 	"fmt"
