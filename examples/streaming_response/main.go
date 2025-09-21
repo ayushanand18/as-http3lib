@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ayushanand18/crazyhttp/internal/constants"
+	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/ayushanand18/crazyhttp/internal/constants"
+	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
@@ -20,7 +21,7 @@ type MyCustomResponseType struct {
 }
 
 func UserIdHandler(ctx context.Context, request interface{}) (response interface{}, err error) {
-	req, err := http3.DecodeJsonRequest[MyCustomRequestType](request)
+	req, err := crazyserver.DecodeJsonRequest[MyCustomRequestType](request)
 	if err != nil {
 		slog.ErrorContext(ctx, "failed to transform request", "err", err)
 		return nil, err

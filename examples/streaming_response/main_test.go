@@ -2,7 +2,6 @@ package main_test
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,8 +10,8 @@ import (
 	"time"
 
 	"github.com/ayushanand18/crazyhttp/internal/constants"
+	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
-	qchttp3 "github.com/quic-go/quic-go/http3"
 )
 
 func HelloWorldStreaming(ctx context.Context, request interface{}) (response interface{}, err error) {
@@ -50,13 +49,7 @@ func TestHTTP3Server_BasicStreamingResponse(t *testing.T) {
 	}()
 	time.Sleep(50 * time.Millisecond)
 
-	client := &http.Client{
-		Transport: &qchttp3.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
-			},
-		},
-	}
+	client := &http.Client{}
 
 	resp, err := client.Get(fmt.Sprintf("https://%s/streaming", addr))
 	if err != nil {

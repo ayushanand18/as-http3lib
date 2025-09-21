@@ -2,15 +2,14 @@ package main_test
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
 	"testing"
 	"time"
 
+	crazyserver "github.com/ayushanand18/crazyhttp/pkg/server"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
-	qchttp3 "github.com/quic-go/quic-go/http3"
 )
 
 func TestUserRoute_NaiveGETRequest(t *testing.T) {
@@ -33,13 +32,7 @@ func TestUserRoute_NaiveGETRequest(t *testing.T) {
 	}()
 	time.Sleep(50 * time.Millisecond)
 
-	client := &http.Client{
-		Transport: &qchttp3.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
-			},
-		},
-	}
+	client := &http.Client{}
 
 	resp, err := client.Get(fmt.Sprintf("https://%s/test", addr))
 	if err != nil {
@@ -81,13 +74,7 @@ func TestUserRoute_NaivePOSTRequest(t *testing.T) {
 	}()
 	time.Sleep(50 * time.Millisecond)
 
-	client := &http.Client{
-		Transport: &qchttp3.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
-			},
-		},
-	}
+	client := &http.Client{}
 
 	contentType := "text/plain; utf-8"
 	resp, err := client.Post(fmt.Sprintf("https://%s/test", addr), contentType, nil)
