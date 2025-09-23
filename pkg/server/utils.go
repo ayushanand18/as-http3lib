@@ -10,7 +10,10 @@ import (
 	"net/http/httputil"
 	"os"
 
+	web_socket "golang.org/x/net/websocket"
+
 	"github.com/ayushanand18/crazyhttp/internal/config"
+	"github.com/ayushanand18/crazyhttp/pkg/types"
 )
 
 func checkIfTlsCertificateIsMissing(ctx context.Context) bool {
@@ -77,4 +80,35 @@ func DumpRequest(req *http.Request) {
 
 	// Restore the body again to ensure downstream handlers can read it
 	req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+}
+
+func GetWebSocketHandlerFunc(handler types.HandlerFunc) func(ws *web_socket.Conn) {
+	return func(ws *web_socket.Conn) {
+		defer ws.Close()
+
+		// TODO: ayushanand18: add encoder/decoder + middleware support
+		for {
+			var msg string
+			if err := web_socket.Message.Receive(ws, &msg); err != nil {
+				if err == io.EOF {
+					slog.Info("WebSocket connection closed by client")
+				} else {
+					slog.Error("Error receiving WebSocket message", "error", err)
+				}
+				break
+			}
+
+			ctx := context.Background()
+			resp, err := handler(ctx, msg)
+			if err != nil {
+				slog.Error("Error handling WebSocket message", "error", err)
+				break
+			}
+
+			if err := web_socket.Message.Send(ws, resp); err != nil {
+				slog.Error("Error sending WebSocket message", "error", err)
+				break
+			}
+		}
+	}
 }
