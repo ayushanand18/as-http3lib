@@ -95,3 +95,9 @@ type RateLimitOptions struct {
 	BucketDurationInSeconds int64  // duration in seconds for which the limit is applicable
 	ContextKey              string // key in context which will be checked for rate limiting
 }
+
+type WebSocketOption struct {
+	AllowedOrigins []string
+}
+
+type WebsocketHandlerFunc func(context.Context) error

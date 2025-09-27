@@ -1,28 +1,35 @@
 package server
 
 import (
+	"net/http"
+	"time"
+
+	"github.com/ayushanand18/crazyhttp/internal/ratelimiter"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
-	web_socket "golang.org/x/net/websocket"
 )
 
 type websocket struct {
 	Url string
 	s   *server
 
-	decoder               types.HttpEncoder
+	rateLimiter *ratelimiter.RateLimiter
+
+	decoder               types.HttpDecoder
 	encoder               types.HttpEncoder
 	beforeServeMiddleware types.HttpRequestMiddleware
 	afterServeMiddleware  types.HttpResponseMiddleware
+
+	options types.WebSocketOption
 
 	description string
 	name        string
 }
 
 type WebSocket interface {
-	Serve(types.HandlerFunc) WebSocket
+	Serve(types.WebsocketHandlerFunc)
 
 	// Decoder for every message received
-	WithDecoder(decoder types.HttpEncoder) WebSocket
+	WithDecoder(decoder types.HttpDecoder) WebSocket
 	// Encoder for every message sent
 	WithEncoder(encoder types.HttpEncoder) WebSocket
 	// Middleware to run before every message is served
@@ -33,7 +40,13 @@ type WebSocket interface {
 	WithName(name string) WebSocket
 	// Description of the websocket endpoint - for Swagger API documentation
 	WithDescription(desc string) WebSocket
-
+	// WithOptions to add serve options
+	WithOptions(options types.WebSocketOption) WebSocket
+	// WithRateLimiter to add rate limiting
+	// rate limit will be applied on each message received
+	// key in context with which rate limiting will be done can be set using RateLimitOptions.ContextKey
+	WithRateLimit(options types.RateLimitOptions) WebSocket
+	// HandleHandshake to handle custom handshake
 	HandleHandshake(types.WebSocketHandshakeFunc) WebSocket
 }
 
@@ -41,13 +54,12 @@ func NewWebsocket(url string, s *server) WebSocket {
 	return &websocket{Url: url, s: s}
 }
 
-func (ws *websocket) Serve(handler types.HandlerFunc) WebSocket {
-	fun := GetWebSocketHandlerFunc(handler)
-	ws.s.mux.Handle(ws.Url, web_socket.Handler(fun))
-	return ws
+func (ws *websocket) Serve(handler types.WebsocketHandlerFunc) {
+	fun := ws.GetWebSocketHandlerFunc(handler)
+	ws.s.mux.HandleFunc(ws.Url, http.HandlerFunc(fun))
 }
 
-func (ws *websocket) WithDecoder(decoder types.HttpEncoder) WebSocket {
+func (ws *websocket) WithDecoder(decoder types.HttpDecoder) WebSocket {
 	ws.decoder = decoder
 	return ws
 }
@@ -78,5 +90,16 @@ func (ws *websocket) WithDescription(desc string) WebSocket {
 }
 
 func (ws *websocket) HandleHandshake(fn types.WebSocketHandshakeFunc) WebSocket {
+	return ws
+}
+
+func (ws *websocket) WithOptions(options types.WebSocketOption) WebSocket {
+	ws.options = options
+	return ws
+}
+
+func (ws *websocket) WithRateLimit(options types.RateLimitOptions) WebSocket {
+	ws.rateLimiter = ratelimiter.NewRateLimiter(options.Limit, time.Duration(options.BucketDurationInSeconds)*time.Second)
+
 	return ws
 }

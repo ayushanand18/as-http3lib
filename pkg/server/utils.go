@@ -5,15 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log"
 	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"os"
 
-	web_socket "golang.org/x/net/websocket"
-
 	"github.com/ayushanand18/crazyhttp/internal/config"
+	internalhttp "github.com/ayushanand18/crazyhttp/internal/http"
 	"github.com/ayushanand18/crazyhttp/pkg/types"
+	gws "github.com/gorilla/websocket"
 )
 
 func checkIfTlsCertificateIsMissing(ctx context.Context) bool {
@@ -82,33 +83,26 @@ func DumpRequest(req *http.Request) {
 	req.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 }
 
-func GetWebSocketHandlerFunc(handler types.HandlerFunc) func(ws *web_socket.Conn) {
-	return func(ws *web_socket.Conn) {
-		defer ws.Close()
-
-		// TODO: ayushanand18: add encoder/decoder + middleware support
-		for {
-			var msg string
-			if err := web_socket.Message.Receive(ws, &msg); err != nil {
-				if err == io.EOF {
-					slog.Info("WebSocket connection closed by client")
-				} else {
-					slog.Error("Error receiving WebSocket message", "error", err)
+// GetWebSocketHandlerFunc wraps a method onto websocket handler func
+func (ws *websocket) GetWebSocketHandlerFunc(handler types.WebsocketHandlerFunc) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		upgrader := gws.Upgrader{
+			CheckOrigin: func(req *http.Request) bool {
+				if len(ws.options.AllowedOrigins) > 0 &&
+					!internalhttp.IsOriginAllowed(r.Header.Get("Origin"), ws.options.AllowedOrigins) {
+					return false
 				}
-				break
-			}
-
-			ctx := context.Background()
-			resp, err := handler(ctx, msg)
-			if err != nil {
-				slog.Error("Error handling WebSocket message", "error", err)
-				break
-			}
-
-			if err := web_socket.Message.Send(ws, resp); err != nil {
-				slog.Error("Error sending WebSocket message", "error", err)
-				break
-			}
+				return true
+			},
 		}
+
+		c, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			slog.Error("Error handling Upgrading websocket", "error", err)
+			return
+		}
+		defer c.Close()
+
+		websocketHandler(r.Context(), c, w, r, ws, handler)
 	}
 }
